@@ -164,6 +164,35 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: top 0.5s; width: 80%; text-align: center;
         }
         .toast.show { top: 20px; }
+	/* [사료 엔딩 화면 스타일] */
+        .history-paper {
+            width: 85%; max-width: 400px;
+            background-color: #fdfbf7; color: #2c3e50;
+            padding: 30px; border-radius: 5px;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            text-align: left; /* 사료는 왼쪽 정렬 */
+            position: relative;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .history-title {
+            text-align: center; font-family: 'Nanum Myeongjo', serif;
+            border-bottom: 2px solid #2c3e50; padding-bottom: 10px; margin-bottom: 20px;
+            font-size: 22px; color: #8e44ad;
+        }
+        .history-section { margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
+        .history-label { font-weight: bold; color: #c0392b; margin-right: 5px; }
+        .history-text { color: #34495e; }
+        .history-list { list-style-type: circle; padding-left: 20px; margin: 5px 0; }
+        .history-list li { margin-bottom: 3px; color: #555; font-size: 13px; }
+        
+        /* 다시하기 버튼 스타일 수정 */
+        .restart-btn {
+            display: block; width: 100%; margin-top: 20px;
+            padding: 12px; background: #2c3e50; color: #ecf0f1;
+            border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
+        }
+        .restart-btn:hover { background: #34495e; }
     </style>
 </head>
 <body>
@@ -229,9 +258,12 @@
     </div>
 
     <div id="game-over-screen" class="game-over-overlay">
-        <h1 id="end-title" style="color: #e74c3c; margin-bottom:20px;">GAME OVER</h1>
-        <p id="end-message" style="font-size: 18px; margin-bottom:20px; line-height:1.6;">사유</p>
-        <button class="restart-btn" onclick="resetGame()">다시 도전하기</button>
+        <div class="history-paper">
+            <h2 class="history-title">고려사(高麗史) - 인종</h2>
+            <div class="history-content" id="history-content">
+                </div>
+            <button class="restart-btn" onclick="resetGame()">다시 도전하기</button>
+        </div>
     </div>
 
     <script>
@@ -840,22 +872,84 @@
         }
     }
 
+   
+// [수정] 게임 오버 체크 및 사료 생성 호출
     function checkGameOver() {
         let t="패배", m="", over=false;
+        
+        // 엔딩 조건 체크 (기존 로직 유지)
         if(stats.royal<=0){ t="폐위"; m="왕위의 기둥이 무너지고, 결국 신하들에 의해 폐위되었습니다."; unlockAchievement("die_royal"); over=true; }
-        else if(stats.kin<=0){ t="암살"; m="지나친 견제에 위기감을 느낀 외척에게 독살당했습니다."; unlockAchievement("die_poison"); over=true; }
+        else if(stats.kin<=0){ t="독살"; m="지나친 견제에 위기감을 느낀 외척에게 독살당했습니다."; unlockAchievement("die_poison"); over=true; }
         else if(stats.kin>=100){ t="꼭두각시"; m="외척의 손아귀에 조정이 넘어가고, 허수아비 임금이 되었습니다."; unlockAchievement("die_kin"); over=true; }
-        else if(stats.military<=0){ t="반란"; m="군세가 흩어지자 북방이 무너지고, 고려가 오랑캐의 발 아래에 짓밟힙니다."; unlockAchievement("die_military"); over=true; }
-        else if(stats.military>=100){ t="군부독재"; m="군부가 왕을 허수아비로 만들었습니다."; unlockAchievement("die_military"); over=true; }
+        else if(stats.military<=0){ t="함락"; m="군세가 흩어지자 북방이 무너지고, 고려가 오랑캐의 발 아래에 짓밟힙니다."; unlockAchievement("die_military"); over=true; }
+        else if(stats.military>=100){ t="정변"; m="비대해진 군부가 왕을 몰아내고 무신정권을 수립했습니다."; unlockAchievement("die_military"); over=true; }
         else if(stats.money<=0){ t="파산"; m="재정이 바닥나 백성들의 시름만 더욱 깊어질 뿐입니다."; unlockAchievement("die_money"); over=true; }
         else if(stats.public<=0){ t="민란"; m="성난 백성들이 궁으로 쳐들어왔습니다."; unlockAchievement("die_public"); over=true; }
-        else if(stats.military>=80 && stats.royal>=70 && stats.kin<=30){ t="승리"; m="이자겸을 몰아내고 고려의 주권을 되찾았습니다!"; document.getElementById("end-title").style.color="#f1c40f"; unlockAchievement("win_balance"); over=true; }
+        else if(stats.military>=80 && stats.royal>=70 && stats.kin<=30){ t="군주"; m="이자겸을 몰아내고 고려의 주권을 되찾았습니다!"; document.getElementById("end-title").style.color="#f1c40f"; unlockAchievement("win_balance"); over=true; }
 
         if(over) {
-            document.getElementById("end-title").innerText=t; document.getElementById("end-message").innerText=m;
-            document.getElementById("game-over-screen").style.display="flex"; return true;
+            // [NEW] 사료 생성 함수 호출
+            generateHistory(t, m);
+            document.getElementById("game-over-screen").style.display="flex"; 
+            return true;
         }
         return false;
+    }
+
+    // [NEW] 사료(역사 기록) 생성 함수
+    function generateHistory(title, reason) {
+        const content = document.getElementById("history-content");
+        
+        // 1. 재위 기간 계산
+        let years = Math.floor((turn-1)/12)+1;
+        let months = (turn-1)%12+1;
+        let reignTime = `인종 ${years}년 ${months}월`;
+
+        // 2. 업적(기록) 목록 동적 생성
+        let records = [];
+        if (turn > 12) records.push(`즉위 초, 이자겸의 위세 속에서도 ${years}년 넘게 버티었다.`);
+        if (isPhase2) records.push("이자겸의 전횡에 맞서 거사를 도모하였다.");
+        if (phase2StartTurn > 0 && turn - phase2StartTurn > 4) records.push("거사 실패 후에도 끈질기게 저항하며 기회를 엿보았다.");
+        
+        // 스탯 기반 기록
+        if (stats.money > 80) records.push("국고를 가득 채워 나라의 살림을 윤택하게 했다.");
+        if (stats.public > 80) records.push("백성들의 목소리에 귀를 기울여 성군의 자질을 보였다.");
+        if (stats.military > 80) records.push("군사력을 강하게 키워 북방을 경계했다.");
+        
+        // 3. 사관의 말 (엔딩 타입에 따른 평가)
+        let evaluation = "";
+        switch(title) {
+            case "군주": evaluation = "왕은 지혜롭고 용맹하여 외척의 발호를 누르고 왕실의 위엄을 되찾았다. 후세의 왕들이 그를 본받아..."; break;
+            case "독살": case "폐위": evaluation = "왕은 뜻을 펴보려 했으나, 시대의 흐름과 간신들의 횡포를 이겨내지 못했다."; break;
+            case "허수아비": evaluation = "왕좌에 있었으나 왕이 아니었다. 권력은 신하에게 있었으니, 이를 어찌 왕이라 하겠는가."; break;
+            case "정변": case "함락": evaluation = "무력을 통제하지 못해 스스로 화를 불렀다. 칼로 흥한 자, 칼로 망하는 법."; break;
+            case "국가 부도": case "민란": evaluation = "백성의 삶을 돌보지 않고 근본을 잃었으니, 천명(天命)이 떠난 것은 당연한 이치."; break;
+            default: evaluation = "왕의 치세는 짧고 덧없었다. 역사는 그를 비운의 군주로 기억할 것이다.";
+        }
+
+        // 4. HTML 조립
+        let html = `
+            <div class="history-section">
+                <span class="history-label">▣ 재위:</span>
+                <span class="history-text">${reignTime}에 붕어(崩御)하다.</span>
+            </div>
+            <div class="history-section">
+                <span class="history-label">▣ 사인:</span>
+                <span class="history-text">${reason}</span>
+            </div>
+            <div class="history-section">
+                <span class="history-label">▣ 치세의 기록:</span>
+                <ul class="history-list">
+                    ${records.length > 0 ? records.map(r => `<li>${r}</li>`).join('') : "<li>특별히 기록할 만한 일이 없다.</li>"}
+                </ul>
+            </div>
+            <div class="history-section" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:20px;">
+                <span class="history-label">▣ 사관의 평:</span><br>
+                <span class="history-text" style="font-style: italic;">"${evaluation}"</span>
+            </div>
+        `;
+        
+        content.innerHTML = html;
     }
 
     function initSwipe() {
