@@ -174,6 +174,22 @@
             text-align: left; /* 사료는 왼쪽 정렬 */
             position: relative;
             max-height: 80vh; overflow-y: auto;
+	    transform-origin: top center; 
+            opacity: 0;
+        }
+	.history-paper.open-effect {
+            animation: unfoldBook 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes unfoldBook {
+            0% {
+                opacity: 0;
+                transform: perspective(1000px) rotateX(-90deg); 
+            }
+            100% {
+                opacity: 1;
+                transform: perspective(1000px) rotateX(0deg);
+            }
         }
         .history-title {
             text-align: center; font-family: 'Nanum Myeongjo', serif;
@@ -193,6 +209,7 @@
             border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
         }
         .restart-btn:hover { background: #34495e; }
+	
     </style>
 </head>
 <body>
@@ -686,14 +703,17 @@
         stats = { royal: 50, kin: 50, military: 50, money: 50, public: 50 };
         turn = 1; isPhase2 = false; 
         phase2StartTurn = 0;
-        
-        // [NEW] 게임 리셋 시 모든 카드의 '등장 기록' 초기화
+      
         randomDeck.forEach(c => c.hasPlayed = false);
 
         document.body.classList.remove("phase-fire");
         document.getElementById("game-over-screen").style.display="none";
         document.getElementById("intro-screen").style.display="none"; 
         document.getElementById("game-container").style.opacity=1;
+	document.querySelector(".history-paper").classList.remove("open-effect");
+
+        document.body.classList.remove("phase-fire");
+        document.getElementById("game-over-screen").style.display="none";
 
         renderStats(); pickNewCard(); initSwipe();
     }
@@ -888,15 +908,19 @@
         else if(stats.military>=80 && stats.royal>=70 && stats.kin<=30){ t="군주"; m="이자겸을 몰아내고 고려의 주권을 되찾았습니다!"; document.getElementById("end-title").style.color="#f1c40f"; unlockAchievement("win_balance"); over=true; }
 
         if(over) {
-            // [NEW] 사료 생성 함수 호출
             generateHistory(t, m);
-            document.getElementById("game-over-screen").style.display="flex"; 
+            const screen = document.getElementById("game-over-screen");
+            screen.style.display = "flex";
+            
+            // (setTimeout이 없으면 애니메이션이 씹힐 수 있음)
+            setTimeout(() => {
+                document.querySelector(".history-paper").classList.add("open-effect");
+            }, 50);
+            
             return true;
         }
         return false;
     }
-
-    // [NEW] 사료(역사 기록) 생성 함수
     function generateHistory(title, reason) {
         const content = document.getElementById("history-content");
         
