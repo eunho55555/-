@@ -27,17 +27,33 @@
             100% { box-shadow: inset 0 0 150px rgba(255, 0, 0, 0.6); }
         }
 
+        /* [레이어 순서 정리] */
+        .game-container { z-index: 1; }
+        .warning-overlay { z-index: 10; }
+        .intro-overlay { z-index: 9999; }
+        .game-over-overlay { z-index: 10000; }
+        .achieve-modal { z-index: 20000; }
+        .toast { z-index: 30000; }
+        .achieve-btn { z-index: 30000; }
+
         /* [인트로 화면] */
         .intro-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: black; z-index: 99999;
+            background-color: black;
             display: flex; align-items: center; justify-content: center;
             text-align: center; padding: 20px; box-sizing: border-box;
-            transition: opacity 1s; cursor: pointer; border: none; outline: none;
-            color: white; font-family: inherit; touch-action: manipulation;
+            transition: opacity 1s; cursor: pointer;
         }
-        .intro-text { font-size: 22px; font-weight: bold; line-height: 1.8; margin-bottom: 50px; opacity: 0; animation: fadeIn 1.5s forwards; max-width: 80%; pointer-events: none; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
-        @keyframes fadeIn { to { opacity: 1; } }
+        .intro-text { 
+            font-size: 22px; font-weight: bold; line-height: 1.8; margin-bottom: 50px; 
+            opacity: 0; /* 초기엔 투명 */
+            max-width: 80%; pointer-events: none; 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); 
+        }
+        
+        /* 인트로 애니메이션 클래스 */
+        .intro-text.show { animation: fadeIn 1.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* [게임 컨테이너] */
         .game-container { width: 320px; text-align: center; position: relative; opacity: 0; transition: opacity 1s; }
@@ -90,10 +106,17 @@
         .warning-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, transparent 60%, rgba(231, 76, 60, 0.6) 100%);
-            pointer-events: none; z-index: 999; display: none;
+            pointer-events: none; display: none;
             animation: pulseWarning 1s infinite alternate;
         }
         @keyframes pulseWarning { from { opacity: 0.3; } to { opacity: 1; } }
+        
+        .warning-overlay.hint {
+            background: radial-gradient(circle, transparent 50%, rgba(100, 0, 0, 0.5) 100%); 
+            animation: none; 
+            opacity: 1;
+            display: block;
+        }
 
         /* 화면 전체 미세 진동 */
         .shake-effect {
@@ -125,22 +148,64 @@
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
 
-        /* [게임 오버] */
+        /* [게임 오버 & 사료 엔딩 화면] */
         .game-over-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.95); z-index: 99998; flex-direction: column;
+            background-color: rgba(0,0,0,0.95); flex-direction: column;
             align-items: center; justify-content: center; color: white; text-align: center;
         }
-        .restart-btn { padding: 15px 40px; font-size: 20px; border-radius: 50px; cursor: pointer; border: none; background: white; color: #333; margin-top: 20px; }
+
+        /* 사료 종이 스타일 (고풍스러운 두루마리) */
+        .history-paper {
+            width: 85%; max-width: 400px;
+            background: linear-gradient(to bottom, #f4e4bc, #e8d5a7);
+            color: #3e2723;
+            padding: 30px; border-radius: 4px;
+            border-top: 15px solid #4a3121;
+            border-bottom: 15px solid #4a3121;
+            border-left: 1px solid #c0a080;
+            border-right: 1px solid #c0a080;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            text-align: left; position: relative;
+            max-height: 80vh; overflow-y: auto;
+            clip-path: inset(0 0 100% 0);
+            opacity: 1;
+        }
+        .history-paper.open-effect {
+            animation: scrollUnroll 2.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+        @keyframes scrollUnroll {
+            0% { clip-path: inset(0 0 100% 0); }
+            100% { clip-path: inset(0 0 0 0); }
+        }
+
+        .history-title {
+            text-align: center; font-family: 'Nanum Myeongjo', serif;
+            border-bottom: 2px solid #4a3121; padding-bottom: 10px; margin-bottom: 20px;
+            font-size: 24px; font-weight: bold; color: #2d1e17; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .history-label { font-weight: bold; color: #795548; margin-right: 5px; }
+        .history-text { color: #4e342e; }
+        .history-list li { margin-bottom: 3px; color: #5d4037; font-size: 14px; }
+
+        /* 다시하기 버튼 */
+        .restart-btn {
+            display: block; width: 100%; margin-top: 25px;
+            padding: 15px; background: #4a3121; color: #f4e4bc;
+            border: 3px solid #2d1e17; border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: all 0.2s; font-family: 'Nanum Myeongjo', serif;
+        }
+        .restart-btn:hover { background: #5d4037; transform: translateY(-2px); }
+        .restart-btn:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
         /* [업적 UI] */
         .achieve-btn {
             position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); border: 1px solid white;
-            color: white; padding: 5px 10px; border-radius: 15px; font-size: 20px; cursor: pointer; z-index: 100;
+            color: white; padding: 5px 10px; border-radius: 15px; font-size: 20px; cursor: pointer;
         }
         .achieve-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100000; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
         }
         .achieve-box {
             width: 300px; height: 500px; background: #2c3e50; border: 2px solid #f1c40f;
@@ -160,74 +225,10 @@
         .toast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: rgba(241, 196, 15, 0.9); color: #2c3e50; padding: 10px 20px;
-            border-radius: 20px; font-weight: bold; z-index: 100001;
+            border-radius: 20px; font-weight: bold;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: top 0.5s; width: 80%; text-align: center;
         }
         .toast.show { top: 20px; }
-	/* [사료 엔딩 화면 스타일] */
-        /* [수정] 사료 펼쳐지는 애니메이션 (고풍스러운 두루마리 스타일) */
-        .history-paper {
-            width: 85%; max-width: 400px;
-            /* 배경: 더 누렇게 빛바랜 종이 색상 + 은은한 질감 그라데이션 */
-            background: linear-gradient(to bottom, #f4e4bc, #e8d5a7);
-            color: #3e2723; /* 글씨 색: 새까만색 대신 진한 갈색 */
-            padding: 30px;
-            border-radius: 4px;
-
-            /* [핵심 변경] 두루마리 봉: 보라색 -> 짙은 고동색(오래된 나무 느낌) */
-            border-top: 15px solid #4a3121;
-            border-bottom: 15px solid #4a3121;
-            /* 옆 테두리는 종이 색과 비슷하게 자연스럽게 처리 */
-            border-left: 1px solid #c0a080;
-            border-right: 1px solid #c0a080;
-
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6); /* 그림자를 더 진하게 */
-            text-align: left;
-            position: relative;
-            max-height: 80vh; overflow-y: auto;
-
-            /* 초기 상태: 아래쪽 100%를 잘라내서 안 보이게 함 (유지) */
-            clip-path: inset(0 0 100% 0);
-            opacity: 1;
-        }
-
-        /* 이 클래스가 붙으면 애니메이션 실행 (유지) */
-        .history-paper.open-effect {
-            animation: scrollUnroll 2.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-
-        @keyframes scrollUnroll {
-            0% { clip-path: inset(0 0 100% 0); }
-            100% { clip-path: inset(0 0 0 0); }
-        }
-
-        /* [추가 수정] 내부 요소 색상도 고풍스럽게 통일 */
-        .history-title {
-            text-align: center; font-family: 'Nanum Myeongjo', serif;
-            border-bottom: 2px solid #4a3121;
-            padding-bottom: 10px; margin-bottom: 20px;
-            font-size: 24px; font-weight: bold;
-            color: #2d1e17; 
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        .history-label { font-weight: bold; color: #795548; margin-right: 5px; }
-        .history-text { color: #4e342e; }
-        .history-list li { margin-bottom: 3px; color: #5d4037; font-size: 14px; }
-
-        /* 다시하기 버튼 스타일 수정 (나무 현판 느낌) */
-        .restart-btn {
-            display: block; width: 100%; margin-top: 25px;
-            padding: 15px;
-            background: #4a3121; 
-            color: #f4e4bc; 
-            border: 3px solid #2d1e17; 
-            border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: all 0.2s; font-family: 'Nanum Myeongjo', serif;
-        }
-        .restart-btn:hover { background: #5d4037; transform: translateY(-2px); }
-        .restart-btn:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }}
-	
     </style>
 </head>
 <body>
@@ -242,27 +243,26 @@
         </div>
     </div>
 
-    <button id="intro-screen" class="intro-overlay" type="button" onclick="nextIntro()">
+    <div id="intro-screen" class="intro-overlay" onclick="nextIntro()">
         <div id="intro-text" class="intro-text"></div>
-    </button>
+    </div>
+    
     <div id="warning-overlay" class="warning-overlay"></div>
+    
     <div id="game-container" class="game-container">
         <div class="top-bar">
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-0"></div>
                 <div class="stat-item"><div class="stat-icon">👑</div><div class="stat-fill" id="fill-royal"></div></div>
-                <div class="stat-name">왕권</div>
-            </div>
+                <div class="stat-name" id="label-royal">왕권</div> </div>
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-1"></div>
                 <div class="stat-item"><div class="stat-icon">🐍</div><div class="stat-fill" id="fill-kin"></div></div>
-                <div class="stat-name">외척</div>
-            </div>
+                <div class="stat-name" id="label-kin">외척</div> </div>
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-2"></div>
                 <div class="stat-item"><div class="stat-icon">⚔️</div><div class="stat-fill" id="fill-military"></div></div>
-                <div class="stat-name">군사</div>
-            </div>
+                <div class="stat-name" id="label-military">군사</div> </div>
         </div>
 
         <div class="card-container">
@@ -294,10 +294,10 @@
 
     <div id="game-over-screen" class="game-over-overlay">
         <div class="history-paper">
-            <h2 class="history-title">고려사(高麗史) - 인종</h2>
+            <h2 class="history-title">고려사(高麗史) - 인종 세가</h2>
             <div class="history-content" id="history-content">
-                </div>
-            <button class="restart-btn" onclick="resetGame()">다시 도전하기</button>
+            </div>
+            <button class="restart-btn" onclick="resetGame()">역사 다시 쓰기</button>
         </div>
     </div>
 
@@ -314,7 +314,9 @@
         { id: "die_money", icon: "💸", title: "파산 신청", desc: "국고 탕진으로 고려가 망하다." },
         { id: "die_public", icon: "🔥", title: "성난 민심", desc: "민란이 일어나 궁궐이 불타다." },
         { id: "turn_50", icon: "⏳", title: "절반의 성공", desc: "50턴(약 4년)을 버티다." },
-        { id: "turn_100", icon: "📜", title: "장수왕", desc: "100턴 이상 장기 집권하다." }
+        { id: "turn_100", icon: "📜", title: "장수왕", desc: "100턴 이상 장기 집권하다." },
+	{ id: "max_money", icon: "💰", title: "부국", desc: "국고가 가득 차 넘쳐 부유한 나라를 이루다." },
+        { id: "max_public", icon: "🙏", title: "성군", desc: "민심이 하늘을 찌르니 실로 만백성의 어버이라 할만하다." }
     ];
 
     function getUnlockedData() {
@@ -326,8 +328,6 @@
         if (!unlocked.includes(id)) {
             unlocked.push(id);
             localStorage.setItem("reigns_achievements", JSON.stringify(unlocked));
-            
-            // 알림 표시
             const item = achievements.find(a => a.id === id);
             if(item) showToast(`🏆 업적 달성: ${item.title}`);
         }
@@ -343,19 +343,12 @@
         const modal = document.getElementById("achieve-modal");
         const list = document.getElementById("achieve-list");
         const unlocked = getUnlockedData();
-        
         list.innerHTML = "";
         achievements.forEach(a => {
             const isUnlocked = unlocked.includes(a.id);
             const div = document.createElement("div");
             div.className = `achieve-item ${isUnlocked ? "unlocked" : ""}`;
-            div.innerHTML = `
-                <div class="achieve-icon">${a.icon}</div>
-                <div class="achieve-info">
-                    <h3>${a.title} ${isUnlocked ? "✅" : "🔒"}</h3>
-                    <p>${isUnlocked ? a.desc : "???"}</p>
-                </div>
-            `;
+            div.innerHTML = `<div class="achieve-icon">${a.icon}</div><div class="achieve-info"><h3>${a.title} ${isUnlocked ? "✅" : "🔒"}</h3><p>${isUnlocked ? a.desc : "???"}</p></div>`;
             list.appendChild(div);
         });
         modal.style.display = "flex";
@@ -364,10 +357,8 @@
     function closeAchieve() { document.getElementById("achieve-modal").style.display = "none"; }
 
     // --------------------------------------------------------------------------------
-    // [게임 로직] 기존 코드 + 업적 연동
+    // [게임 로직]
     // --------------------------------------------------------------------------------
-    
-    // 1. 인트로
     const introLines = [
         "고려 예종 17년…",
         "딸이 왕비로 책봉된 외척 세력 ‘이자겸’이<br>점점 세력을 넓히고 있고,",
@@ -377,361 +368,138 @@
     ];
 
     let introIndex = 0;
-    function nextIntro() {
-        introIndex++; const txt = document.getElementById("intro-text");
+    
+    // [중요] 인트로 텍스트 표시 함수
+    function showIntroText() {
+        const txt = document.getElementById("intro-text");
         if(introIndex < introLines.length) {
-            txt.innerHTML = introLines[introIndex]; txt.style.animation='none'; void txt.offsetWidth; txt.style.animation='fadeIn 1.5s forwards';
+            txt.innerHTML = introLines[introIndex]; 
+            // 애니메이션 재시작을 위한 꼼수
+            txt.classList.remove("show");
+            void txt.offsetWidth; // 리플로우 강제
+            txt.classList.add("show");
         } else {
-            const sc = document.getElementById("intro-screen"); sc.style.opacity=0; sc.style.pointerEvents="none";
-            setTimeout(()=>{ sc.style.display="none"; document.getElementById("game-container").style.opacity=1; initSwipe(); },1000);
+            const sc = document.getElementById("intro-screen"); 
+            sc.style.opacity=0; 
+            sc.style.pointerEvents="none";
+            setTimeout(()=>{ 
+                sc.style.display="none"; 
+                document.getElementById("game-container").style.opacity=1; 
+                initSwipe(); 
+            }, 1000);
         }
     }
 
-    // 2. 게임 변수
+    function nextIntro() {
+        introIndex++;
+        showIntroText();
+    }
+
+    // 게임 변수
     let stats = { royal: 50, kin: 50, military: 50, money: 50, public: 50 };
     let turn = 1; 
     let currentCard = {}; 
     let nextEventCard = null;
     let isPhase2 = false;
-    let phase2StartTurn = 0; // f 제거 완료
+    let phase2StartTurn = 0;
 
-    // [데이터] 연계 이벤트
-    const event_fire_loot = { text: "“불이 서적과 보물이 가득한 전각으로 번지고 있습니다!”", leftBtn: "왕실 서적을 옮겨라", rightBtn: "보물을 챙겨라", leftEffect: [5, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 20, -10], requirePhase2: true };
-    const event_arson = { text: "“척준경이 궁에 불을 질렀습니다! 연경궁이 타고 있습니다!”", leftBtn: "불부터 꺼라", rightBtn: "도망치자", leftEffect: [0, 0, 0, -10, 5], rightEffect: [-20, 0, 0, 0, -20], leftNext: event_fire_loot, rightNext: event_fire_loot, requirePhase2: true };
-    const event_cheok_rage = { text: "“척준경의 동생과 아들이 우리 군사에게 죽었습니다! 척준경이 분노하여 달려옵니다!”", leftBtn: "성문을 잠궈라!", rightBtn: "오해였다고 전해라", leftEffect: [0, 0, -10, 0, -10], rightEffect: [-10, 0, 0, 0, 0], leftNext: event_arson, rightNext: event_arson, requirePhase2: true };
+    // [데이터 1] 연계 이벤트
+    const event_fire_loot = {
+        text: "“불이 서적과 보물이 가득한 전각으로 번지고 있습니다!”", leftBtn: "왕실 서적을 옮겨라", rightBtn: "보물을 챙겨라", leftEffect: [5, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 20, -10], requirePhase2: true };
+    const event_arson = { text: "“척준경이 결국 궁에 불을 질렀습니다! 연경궁이 타고 있습니다!”", leftBtn: "불부터 꺼라", rightBtn: "도망치자", leftEffect: [0, 0, 0, -10, 5], rightEffect: [-20, 0, 0, 0, -20], leftNext: event_fire_loot, rightNext: event_fire_loot, requirePhase2: true };
+    const event_seungpyeong_gate = { text: "“반란군이 승평문(昇平門) 앞까지 들이닥쳤습니다! 척준경이 문을 부수려 합니다!”", leftBtn: "활을 쏘아 맞서라!", rightBtn: "일단 대화로 시간을 끌어라",  leftEffect: [10, -20, -10, 0, 0], rightEffect: [-10, 0, 0, 0, 0], leftNext: event_arson, rightNext: event_arson, requirePhase2: true };
+    const event_cheok_rage = {text: "“척준경의 동생과 아들이 우리 군사에게 죽었습니다! 척준경이 분노하여 달려옵니다!”", leftBtn: "성문을 잠궈라!", rightBtn: "오해였다고 전해라", leftEffect: [0, 0, -10, 0, -10], rightEffect: [-10, 0, 0, 0, 0], leftNext: event_seungpyeong_gate, rightNext: event_seungpyeong_gate,  requirePhase2: true };
 
-    // [데이터] 스토리 덱
+    // [데이터 2] 스토리 덱
     const storyDeck = [
         { id: 1, text: "“전하의 즉위에 이자겸 대감이 손을 쓴 것으로 보입니다.”", leftBtn: "감사를 표하라", rightBtn: "그래서 어쩌라고?", leftEffect: [-10, 10, 0, 0, 0], rightEffect: [10, -10, 0, 0, 0], downBtn: "침묵한다", downEffect: [0, 0, 0, 0, 0] },
-	{ id: 45, text: "“영통사 북쪽에서 까마귀 떼가 시끄럽게 울며 서로 싸우고 있습니다. 흉조가 분명합니다.”", leftBtn: "제사를 지내 액운을 막아라", rightBtn: "미물들의 다툼일 뿐이다", leftEffect: [0, 0, 0, -10, 10], rightEffect: [5, 0, 0, 0, -10] }, 
-        { id: 46, text: "“폐하, 오늘 밤 이자겸의 집을 칠까요? 젊은 관리들이 준비되었습니다.”", leftBtn: "지금이 기회다!", rightBtn: "그들에게 빌미를 줄 뿐이다", leftEffect: [10, -30, 10, 0, 0], leftNext: event_cheok_rage, rightEffect: [-5, 5, 0, 0, 0] },
+        { id: 45, text: "“영통사 북쪽에서 까마귀 떼가 시끄럽게 울며 서로 싸우고 있습니다. 흉조가 분명합니다.”", leftBtn: "제사를 지내 액운을 막아라", rightBtn: "미물들의 다툼일 뿐이다", leftEffect: [0, 0, 0, -10, 10], rightEffect: [5, 0, 0, 0, -10] }, 
+        { id: 46, text: "“폐하, 불만을 품은 무신들이 이자겸을 치자고 제안합니다. 이자겸과 척준경을 제거할 수 있는 기회일지도 모릅니다...”", leftBtn: "지금이 기회다!", rightBtn: "그들에게 빌미를 줄 뿐이다", leftEffect: [10, -30, 10, 0, 0], leftNext: event_cheok_rage, rightEffect: [-5, 5, 0, 0, 0] },
         { id: 51, text: "“폐하! 혈기 왕성한 측근들이 참지 못하고 독단적으로 이자겸의 집을 공격했습니다!”", leftBtn: "이왕 이렇게 된 거 쳐라!", rightBtn: "어리석은 놈들...", leftEffect: [0, 0, 0, 0, 0], leftNext: event_cheok_rage, rightEffect: [0, 0, 0, 0, 0], rightNext: event_cheok_rage, downBtn: "침묵한다", downEffect: [0, 0, 0, 0, 0], downNext: event_cheok_rage }
     ];
 
-    // [데이터] 랜덤 덱
-    // [데이터 3] 랜덤 덱 (밸런스 조정됨)
-    // 스탯 순서: [왕권, 외척, 군사, 국고, 민심]
+    // [데이터 3] 랜덤 덱 (최종 통합본)
     const randomDeck = [
-        // =================================================================
-        // [1페이즈: 이자겸 세력과의 갈등 및 초기 사건] (onlyPhase1: true)
-        // =================================================================
-	{ 
-            onlyPhase1: true, text: "“이자겸이 자신을 '신하'가 아니라 '조부(할아버지)'라고만 부르겠다 합니다.”", 
-            leftBtn: "그러시오", rightBtn: "군신의 예를 지키시오", 
-            leftEffect: [-10, 15, 0, 0, 0], rightEffect: [10, -15, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“척준경이 이자겸에게 서운함을 느끼고 있습니다. 누구에게 선물을 보낼까요?”", 
-            leftBtn: "장인에게 밉보일 이유는 없다", rightBtn: "용맹한 장군을 위로한다", 
-            leftEffect: [0, 10, -5, -5, 0], rightEffect: [5, -5, 15, -5, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“가뭄이 심각해져서 강의 바닥이 보일 정도입니다.”", 
-            leftBtn: "기우제를 올리자", rightBtn: "개입하지 않는다", 
-            leftEffect: [0, 0, 0, -10, 10], rightEffect: [0, 0, 0, 0, -10] 
-        },
-        { 
-            onlyPhase1: true, text: "“궁궐 정원에서 쌍둥이 봉황새가 나타났다는 소문이 돌고 있습니다.”", 
-            leftBtn: "길조를 널리 퍼트려라", rightBtn: "이는 왕실의 복이다", 
-            leftEffect: [5, 0, 0, 0, 10], rightEffect: [10, 0, 0, 0, 5] 
-        },
-        { 
-            onlyPhase1: true, text: "“군대의 비축 군량미가 썩어서 못 쓰게 되었습니다.”", 
-            leftBtn: "알맹이와 쭉정이는 분리해야지", rightBtn: "다시 채워넣어라", 
-            leftEffect: [0, 0, 5, 0, 0], rightEffect: [0, 0, 10, -15, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“금나라 사신이 고려에 머무는 동안 횡포를 부리고 있습니다.”", 
-            leftBtn: "감내해라", rightBtn: "서신으로 불쾌감을 표현해라", 
-            leftEffect: [-5, 0, 0, 0, -5], rightEffect: [5, 0, 5, 0, 5] 
-        },
-        { 
-            onlyPhase1: true, text: "“척준경이 궁궐에서 나무를 들어올려 휘두르는 기예를 선보였습니다.”", 
-            leftBtn: "그대는 고려의 보배다!", rightBtn: "재미있는 묘기로군!", 
-            leftEffect: [0, -5, 15, 0, 0], rightEffect: [5, 0, 5, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“척준경의 먼 친척이 재판에 휘말려, 은밀히 편의를 봐달라 청탁합니다.”", 
-            leftBtn: "체면을 세워준다", rightBtn: "재판은 공정해야한다", 
-            leftEffect: [0, 0, 10, 0, -10], rightEffect: [5, 0, -10, 0, 10] 
-        },
-        { 
-            onlyPhase1: true, text: "“전하, 이자겸 대감께서 셋째 딸을 전하의 비로 맞이하라고 하십니다.”", 
-            leftBtn: "이모와 결혼이라니!", rightBtn: "받아들여라", 
-            leftEffect: [5, -15, 0, 0, 5], rightEffect: [-10, 15, 0, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“대감의 사촌의 팔촌을 장군으로 임명하라는 상소가 올라왔습니다.”", 
-            leftBtn: "시키는 대로 해", rightBtn: "능력이 우선이다", 
-            leftEffect: [-5, 10, -5, 0, 0], rightEffect: [5, -10, 5, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“이자겸 대감의 생신입니다. 선물을 보내시겠습니까?”", 
-            leftBtn: "화려하게 보내라!", rightBtn: "마음만 전해라", 
-            leftEffect: [0, 10, 0, -15, 0], rightEffect: [0, -5, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“시중에 '십자(十八子: 이씨)가 왕이 된다'는 소문이 돌고 있습니다.”", 
-            leftBtn: "헛소문이다!", rightBtn: "흥미롭군...", 
-            leftEffect: [-5, 5, 0, 0, 0], rightEffect: [5, -10, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“왕실의 재정과 이자겸 가문의 재정이 섞여 국고 파악이 어렵습니다.”", 
-            leftBtn: "분리 개혁을 추진하라", rightBtn: "장인이 알아서 하게 두도록", 
-            leftEffect: [5, -10, 0, 5, 0], rightEffect: [-5, 10, 0, -5, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“신하들이 중앙군의 규모를 두 배로 늘리자고 제안합니다.”", 
-            leftBtn: "비밀리에 진행한다", rightBtn: "그럴 예산은 없다", 
-            leftEffect: [0, -5, 10, -10, 0], rightEffect: [0, 0, -5, 5, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“올해는 풍년입니다. 백성들이 수확한 곡식 덕분에 국고가 채워졌습니다.”", 
-            leftBtn: "국고가 넉넉하니 세를 내리도록", rightBtn: "세를 더 걷어도 문제 없겠군", 
-            leftEffect: [0, 0, 0, -5, 15], rightEffect: [0, 0, 0, 15, -15] 
-        },
-        { 
-            onlyPhase1: true, text: "“송나라의 사신이 금나라를 견제하자며 선물을 가지고 왔습니다.”", 
-            leftBtn: "국고에 도움이 되겠구나", rightBtn: "금을 화나게 해선 안된다…", 
-            leftEffect: [0, 0, 5, 10, 0], rightEffect: [0, 0, -5, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“북방의 장군 한 명이 은퇴 후 궁궐 호위직을 자처했습니다.”", 
-            leftBtn: "즉시 임명한다", rightBtn: "노고를 치하하고 돌려보낸다", 
-            leftEffect: [5, -5, 5, -5, 0], rightEffect: [-5, 0, -5, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“궁궐 밖 백성들 사이에서 전염병이 창궐하고 있습니다.”", 
-            leftBtn: "격리시키고 방치하라", rightBtn: "약재를 공급하라", 
-            leftEffect: [0, 0, 0, 5, -15], rightEffect: [5, 0, 0, -10, 10] 
-        },
-        { 
-            onlyPhase1: true, text: "“밤사이 궁궐에 벼락이 떨어져 흉흉한 소문이 돌고 있습니다.”", 
-            leftBtn: "궁궐을 수리하라", rightBtn: "운명이다", 
-            leftEffect: [0, 0, 0, -10, 5], rightEffect: [-5, 0, 0, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“오래된 건물 지붕이 무너졌습니다. 안전을 위해서는 수리해야 합니다.”", 
-            leftBtn: "국고를 털어 수리하라", rightBtn: "장인어른에게 맡기지", 
-            leftEffect: [5, 0, 0, -10, 0], rightEffect: [-5, 10, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“남쪽 해안가에 해적이 자주 출몰하고 있다는 보고가 올라왔습니다.”", 
-            leftBtn: "군사를 보내 토벌하라", rightBtn: "지방에 맡긴다", 
-            leftEffect: [0, 0, -5, -5, 5], rightEffect: [0, 0, 0, 5, -10] 
-        },
-        { 
-            onlyPhase1: true, text: "“환관 한 명이 이자겸과 척준경이 주고 받은 비밀 서찰을 입수해왔습니다. 열어보시겠습니까?”", 
-            leftBtn: "즉시 열어 본다", rightBtn: "태워버려라", 
-            leftEffect: [10, -10, -5, 0, 0], rightEffect: [-5, 5, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“이자겸 파벌과 외척들이 왕에게 절할 때 허리만 굽히는 경우가 늘고 있습니다.”", 
-            leftBtn: "예법을 바로잡아라", rightBtn: "사소한 일이다", 
-            leftEffect: [10, -10, 0, 0, 5], rightEffect: [-10, 10, 0, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“문신들이 모두 이자겸을 두려워해 그 누구도 비판하는 이가 없습니다.”", 
-            leftBtn: "문신들을 독려한다", rightBtn: "무신들에게 의지한다", 
-            leftEffect: [5, -5, 0, 0, 0], rightEffect: [-5, -5, 10, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“이전에 사면받은 죄인을 이자겸이 다시 체포하여 처형했습니다.”", 
-            leftBtn: "꾸짖는다", rightBtn: "사면을 취소한다", 
-            leftEffect: [10, -10, 0, 0, 0], rightEffect: [-10, 5, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“승려들이 대규모 불교 행사를 열기 위한 지원을 요청합니다.”", 
-            leftBtn: "지원한다", rightBtn: "나완 무관한 일이다", 
-            leftEffect: [0, 0, 0, -10, 5], rightEffect: [0, 0, 0, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“탐라군(제주)에서 특산물을 가지고 왔습니다.”", 
-            leftBtn: "후한 보상을 내린다", rightBtn: "더 가져와!", 
-            leftEffect: [0, 0, 0, -5, 5], rightEffect: [0, 0, 0, 10, -10] 
-        },
-        { 
-            onlyPhase1: true, text: "“왕실의 정통성을 위해 역사서를 새로 편찬하자는 건의가 올라왔습니다.”", 
-            leftBtn: "학자들에게 명령한다", rightBtn: "시급한 일은 아니다", 
-            leftEffect: [5, -5, 0, -5, 0], rightEffect: [-5, 0, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“관리 부실로 지방 세금 징수가 원활하게 이루어지지 않고 있습니다.”", 
-            leftBtn: "군사를 파견하라", rightBtn: "이번만은 사정을 봐주자", 
-            leftEffect: [0, 0, -5, 10, -10], rightEffect: [0, 0, 0, -5, 5] 
-        },
-        { 
-            onlyPhase1: true, text: "“이자겸의 종들이 백성들의 땅을 뺏어 수레에 싣고 있습니다.”", 
-            leftBtn: "어쩔 수 없다...", rightBtn: "수레를 엎어라!", 
-            leftEffect: [-5, 5, 0, 0, -10], rightEffect: [5, -10, 0, 0, 10] 
-        },
-        { 
-            onlyPhase1: true, text: "“이자겸이 집에 '숭덕부'라는 관청을 세우고 독자적으로 정치를 하려 합니다.”", 
-            leftBtn: "수고를 덜어주니...", rightBtn: "왕이 둘이냐?", 
-            leftEffect: [-10, 15, 0, 0, 0], rightEffect: [10, -15, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“이자겸이 몰래 사병을 기르고 무기를 사들이고 있다는 첩보입니다.”", 
-            leftBtn: "나라를 위해서겠지", rightBtn: "우리도 모으자", 
-            leftEffect: [-5, 5, -5, 0, 0], rightEffect: [5, -10, 10, -10, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“매형(이자겸의 아들)이 사냥을 가자고 합니다. 화살이 어디로 날아올지 모릅니다.”", 
-            leftBtn: "겁먹을 순 없다", rightBtn: "아프다고 한다", 
-            leftEffect: [5, -5, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“척준경이 술에 취해 왕실 근위병을 폭행했습니다.”", 
-            leftBtn: "장군이 취했구려", rightBtn: "곤장을 쳐라", 
-            leftEffect: [-5, 0, 5, 0, -5], rightEffect: [5, 0, -15, 0, 5] 
-        },
-        { 
-            onlyPhase1: true, text: "“서역 상인이 질 좋은 철검을 가지고 왔습니다.”", 
-            leftBtn: "모두 사들여라", rightBtn: "돈이 없다", 
-            leftEffect: [0, 0, 10, -15, 0], rightEffect: [0, 0, -5, 0, 0] 
-        },
+        { onlyPhase1: true, text: "“전하, 이자겸 대감께서 셋째 딸을 전하의 비로 맞이하라고 하십니다.”", leftBtn: "이모와 결혼이라니!", rightBtn: "받아들여라", leftEffect: [5, -15, 0, 0, 5], rightEffect: [-10, 15, 0, 0, -5] },
+        { onlyPhase1: true, text: "“대감의 사촌의 팔촌을 장군으로 임명하라는 상소가 올라왔습니다.”", leftBtn: "시키는 대로 해", rightBtn: "능력이 우선이다", leftEffect: [-5, 10, -5, 0, 0], rightEffect: [5, -10, 5, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸 대감의 생신입니다. 선물을 보내시겠습니까?”", leftBtn: "화려하게 보내라!", rightBtn: "마음만 전해라", leftEffect: [0, 10, 0, -15, 0], rightEffect: [0, -5, 0, 0, 0] },
+        { onlyPhase1: true, text: "“시중에 '십자(十八子: 이씨)가 왕이 된다'는 소문이 돌고 있습니다.”", leftBtn: "헛소문이다!", rightBtn: "흥미롭군...", leftEffect: [-5, 5, 0, 0, 0], rightEffect: [5, -10, 0, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸 대감이 전하께 떡을 보냈습니다. 무언가 수상합니다.”", leftBtn: "장인의 정성인데...", rightBtn: "새에게 던져라", leftEffect: [0, 0, 0, 0, 0], isPoison: true, rightEffect: [5, -10, 0, 0, 0] },
+        { onlyPhase1: true, text: "“왕실의 재정과 이자겸 가문의 재정이 섞여 국고 파악이 어렵습니다.”", leftBtn: "분리 개혁을 추진하라", rightBtn: "장인이 알아서 하겠지", leftEffect: [5, -10, 0, 5, 0], rightEffect: [-5, 10, 0, -5, 0] },
+        { onlyPhase1: true, text: "“신하들이 중앙군의 규모를 두 배로 늘리자고 제안합니다.”", leftBtn: "비밀리에 진행한다", rightBtn: "돈이 문제다", leftEffect: [0, -5, 10, -10, 0], rightEffect: [0, 0, -5, 5, 0] },
+        { onlyPhase1: true, text: "“올해는 풍년입니다. 백성들이 수확한 곡식 덕분에 국고가 채워졌습니다.”", leftBtn: "세금을 낮춰라", rightBtn: "전부 짐의 것이다!", leftEffect: [0, 0, 0, -5, 15], rightEffect: [0, 0, 0, 15, -15] },
+        { onlyPhase1: true, text: "“송나라의 사신이 금나라를 견제하자며 선물을 가지고 왔습니다.”", leftBtn: "국고에 채워 넣어", rightBtn: "금을 화나게 해선 안된다…", leftEffect: [0, 0, 5, 10, 0], rightEffect: [0, 0, -5, 0, 0] },
+        { onlyPhase1: true, text: "“북방의 장군 한 명이 은퇴 후 궁궐 호위직을 자처했습니다.”", leftBtn: "즉시 임명한다", rightBtn: "노고를 치하하고 돌려보낸다", leftEffect: [5, -5, 5, -5, 0], rightEffect: [-5, 0, -5, 0, 0] },
+        { onlyPhase1: true, text: "“궁궐 밖 백성들 사이에서 전염병이 창궐하고 있습니다.”", leftBtn: "격리시키고 방치하라", rightBtn: "약재를 공급하라", leftEffect: [0, 0, 0, 5, -15], rightEffect: [5, 0, 0, -10, 10] },
+        { onlyPhase1: true, text: "“밤사이 궁궐에 벼락이 떨어져 흉흉한 소문이 돌고 있습니다.”", leftBtn: "궁궐을 수리하라", rightBtn: "운명이다", leftEffect: [0, 0, 0, -10, 5], rightEffect: [-5, 0, 0, 0, -5] },
+        { onlyPhase1: true, text: "“오래된 건물 지붕이 무너졌습니다. 안전을 위해서는 수리해야 합니다.”", leftBtn: "국고를 털어 수리하라", rightBtn: "장인어른, 부탁드립니다", leftEffect: [5, 0, 0, -10, 0], rightEffect: [-5, 10, 0, 0, 0] },
+        { onlyPhase1: true, text: "“남쪽 해안가에 해적이 자주 출몰하고 있다는 보고가 올라왔습니다.”", leftBtn: "군사를 보내 토벌하라", rightBtn: "지방에 맡긴다", leftEffect: [0, 0, -5, -5, 5], rightEffect: [0, 0, 0, 5, -10] },
+        { onlyPhase1: true, text: "“환관 한 명이 이자겸과 척준경이 주고 받은 비밀 서찰을 입수해왔습니다. 열어보시겠습니까?”", leftBtn: "즉시 열어 본다", rightBtn: "태워버려라", leftEffect: [10, -10, -5, 0, 0], rightEffect: [-5, 5, 0, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸 파벌과 외척들이 왕에게 절할 때 허리만 굽히는 경우가 늘고 있습니다.”", leftBtn: "예법을 바로잡아라", rightBtn: "사소한 일이다", leftEffect: [10, -10, 0, 0, 5], rightEffect: [-10, 10, 0, 0, -5] },
+        { onlyPhase1: true, text: "“문신들이 모두 이자겸을 두려워해 그 누구도 비판하는 이가 없습니다.”", leftBtn: "독려한다", rightBtn: "무신들에게 의지한다", leftEffect: [5, -5, 0, 0, 0], rightEffect: [-5, -5, 10, 0, 0] },
+        { onlyPhase1: true, text: "“이전에 사면받은 죄인을 이자겸이 다시 체포하여 처형했습니다.”", leftBtn: "꾸짖는다", rightBtn: "사면을 취소한다", leftEffect: [10, -10, 0, 0, 0], rightEffect: [-10, 5, 0, 0, 0] },
+        { onlyPhase1: true, text: "“승려들이 대규모 불교 행사를 열기 위한 지원을 요청합니다.”", leftBtn: "지원한다", rightBtn: "알아서 해라", leftEffect: [0, 0, 0, -10, 5], rightEffect: [0, 0, 0, 0, -5] },
+        { onlyPhase1: true, text: "“탐라군(제주)에서 특산물을 가지고 왔습니다.”", leftBtn: "후한 보상을 내린다", rightBtn: "더 가져와!", leftEffect: [0, 0, 0, -5, 5], rightEffect: [0, 0, 0, 10, -10] },
+        { onlyPhase1: true, text: "“왕실의 정통성을 위해 역사서를 새로 편찬하자는 건의가 올라왔습니다.”", leftBtn: "학자들에게 명령한다", rightBtn: "시급한 일이 아니다", leftEffect: [5, -5, 0, -5, 0], rightEffect: [-5, 0, 0, 0, 0] },
+        { onlyPhase1: true, text: "“관리 부실로 지방 세금 징수가 원활하게 이루어지지 않고 있습니다.”", leftBtn: "군사를 파견하라", rightBtn: "사정을 봐주자", leftEffect: [0, 0, -5, 10, -10], rightEffect: [0, 0, 0, -5, 5] },
+        { onlyPhase1: true, text: "“이자겸의 종들이 백성들의 땅을 뺏어 수레에 싣고 있습니다.”", leftBtn: "어쩔 수 없다...", rightBtn: "수레를 엎어라!", leftEffect: [-5, 5, 0, 0, -10], rightEffect: [5, -10, 0, 0, 10] },
+        { onlyPhase1: true, text: "“이자겸이 집에 '숭덕부'라는 관청을 세우고 독자적으로 정치를 하려 합니다.”", leftBtn: "수고를 덜어주니...", rightBtn: "왕이 둘이냐?", leftEffect: [-10, 15, 0, 0, 0], rightEffect: [10, -15, 0, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸이 몰래 사병을 기르고 무기를 사들이고 있다는 첩보입니다.”", leftBtn: "나라를 위해서겠지", rightBtn: "우리도 모으자", leftEffect: [-5, 5, -5, 0, 0], rightEffect: [5, -10, 10, -10, 0] },
+        { onlyPhase1: true, text: "“매형(이자겸의 아들)이 사냥을 가자고 합니다. 화살이 어디로 날아올지 모릅니다.”", leftBtn: "겁먹을 순 없다", rightBtn: "아프다고 한다", leftEffect: [5, -5, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0] },
+        { onlyPhase1: true, text: "“척준경이 술에 취해 왕실 근위병을 폭행했습니다.”", leftBtn: "장군이 취했구려", rightBtn: "곤장을 쳐라", leftEffect: [-5, 0, 5, 0, -5], rightEffect: [5, 0, -15, 0, 5] },
+        { onlyPhase1: true, text: "“서역 상인이 질 좋은 철검을 가지고 왔습니다.”", leftBtn: "모두 사들여라", rightBtn: "돈이 없다", leftEffect: [0, 0, 10, -15, 0], rightEffect: [0, 0, -5, 0, 0] },
+        { onlyPhase1: true, text: "“신봉문(神鳳門)에 행차하여 죄인들을 사면하시겠습니까?”", leftBtn: "덕을 베풀라", rightBtn: "법은 엄격해야 한다", leftEffect: [5, 0, 0, 0, 10], rightEffect: [0, 0, 5, 0, -5] },
+        { onlyPhase1: true, text: "“김부식 등이 선왕의 기록인 '예종실록' 편찬을 시작하겠다고 합니다.”", leftBtn: "지원을 아끼지 마라", rightBtn: "국고를 아껴라", leftEffect: [5, -5, 0, -10, 0], rightEffect: [0, 0, 0, 5, 0] },
+        { onlyPhase1: true, text: "“팔관회를 열어 부처님의 힘으로 나라의 안녕을 빌 시기가 되었습니다.”", leftBtn: "성대하게 열어라", rightBtn: "간소하게 하라", leftEffect: [0, 0, 0, -15, 10], rightEffect: [0, 0, 0, 5, -5] },
+        { onlyPhase1: true, text: "“동여진 추장이 화친의 의미로 좋은 말을 바쳤습니다.”", leftBtn: "하사품을 내려라", rightBtn: "경계해야 한다", leftEffect: [0, 0, 5, -5, 0], rightEffect: [0, 0, -5, 0, 0] },
+        { onlyPhase1: true, text: "“송나라 사신이 전하께 정식으로 책봉을 요청하라고 귀띔했습니다.”", leftBtn: "사신을 보내라", rightBtn: "우리는 독자적이다", leftEffect: [10, 0, 0, -5, 0], rightEffect: [-5, 0, 0, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸 대감이 공을 인정받아 '조선국공(朝鮮國公)'의 지위에 오르길 원합니다.”", leftBtn: "허락한다...", rightBtn: "그건 왕의 지위다!", leftEffect: [-15, 25, 0, 0, 0], rightEffect: [10, -20, 0, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸 대감이 자신의 집으로 전하를 초대해 밤늦게까지 잔치를 열자고 합니다.”", leftBtn: "장인의 청이니 가자", rightBtn: "체통을 지켜야 한다", leftEffect: [-5, 10, 0, 0, 0], rightEffect: [5, -5, 0, 0, 0] },
+        { onlyPhase1: true, text: "“금나라가 우리 국서가 표문(신하의 글) 형식이 아니라며 받지 않고 돌려보냈습니다!”", leftBtn: "굴욕적이지만 고쳐라", rightBtn: "오랑캐 주제에!", leftEffect: [-10, 0, 0, 0, 0], rightEffect: [5, 0, 10, -5, 0] },
+        { onlyPhase1: true, text: "“잡류(천한 출신)의 자손들이 관직에 오르는 것을 제한해야 한다는 상소입니다.”", leftBtn: "기강을 바로잡아라", rightBtn: "능력이 중요하다", leftEffect: [0, 5, 0, 0, -5], rightEffect: [0, -5, 0, 0, 5] },
+        { onlyPhase1: true, text: "“요나라(거란)로 보낸 사신이 길이 막혀 도착하지 못하고 돌아왔습니다. 국제 정세가 심상치 않습니다.”", leftBtn: "금나라와 친해지자", rightBtn: "송나라를 믿자", leftEffect: [0, 5, -5, 0, 0], rightEffect: [5, 0, 0, 0, 0] },
+        { onlyPhase1: true, text: "“가뭄이 계속되고 있습니다. 무당을 모아 비를 빌어야 한다는 건의가 있습니다.”", leftBtn: "기우제를 지내라", rightBtn: "미신일 뿐이다", leftEffect: [0, 0, 0, -5, 5], rightEffect: [0, 0, 0, 0, -5] },
+        { onlyPhase1: true, text: "“억울함을 호소하는 죄수들이 많습니다. 재심을 하시겠습니까?”", leftBtn: "다시 살펴라", rightBtn: "판결은 유지된다", leftEffect: [5, 0, 0, 0, 5], rightEffect: [0, 0, 0, 0, -5] },
+        { onlyPhase1: true, text: "“지방의 주(州)와 진(鎭)을 지키는 장교들의 녹봉(월급) 기준을 정해야 합니다.”", leftBtn: "후하게 줘라", rightBtn: "적당히 줘라", leftEffect: [0, 0, 10, -10, 0], rightEffect: [0, 0, -5, 5, 0] },
+        { onlyPhase1: true, text: "“탐관오리들이 국법을 교묘하게 악용해 백성들을 수탈하고 있습니다.”", leftBtn: "엄벌에 처하라!", rightBtn: "관료들을 믿어보자", leftEffect: [5, -5, 0, 0, 10], rightEffect: [-5, 5, 0, 0, -10] },
+        { onlyPhase1: true, text: "“과거 시험 합격자 명단이 올라왔습니다. 누구를 등용하시겠습니까?”", leftBtn: "능력 위주로 뽑아라", rightBtn: "추천받은 자를 뽑아라", leftEffect: [5, -5, 0, 0, 0], rightEffect: [-5, 10, 0, 0, 0] },
+        { onlyPhase1: true, text: "“대낮에 해가 빛을 잃었습니다(일식)! 왕의 부덕함을 경고하는 하늘의 뜻입니다.”", leftBtn: "자숙하고 반성한다", rightBtn: "자연 현상일 뿐이다", leftEffect: [-5, 0, 0, 0, 5], rightEffect: [0, 0, 0, 0, -5] },
+        { onlyPhase1: true, text: "“정기 인사를 단행할 시기입니다. 주요 관직을 어떻게 채우시겠습니까?”", leftBtn: "내 사람을 심는다", rightBtn: "외척에게 자문을 구한다", leftEffect: [10, -10, 0, 0, 0], rightEffect: [-10, 15, 0, 0, 0] },
+        { onlyPhase1: true, text: "“멸망해가는 거란(요나라)에서 사신을 보내 구원을 요청했습니다.”", leftBtn: "사신을 맞이하라", rightBtn: "금나라 눈치가 보인다", leftEffect: [0, 0, 5, -5, 0], rightEffect: [0, 0, 0, 0, 0] },
+        { onlyPhase1: true, text: "“하늘에 붉은 기운이 나타났습니다! 흉흉한 징조가 아니겠습니까?”", leftBtn: "경계를 강화하라", rightBtn: "무시해라", leftEffect: [0, 0, 5, -5, -5], rightEffect: [0, 0, 0, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸이 자신을 '신하'가 아니라 '조부(할아버지)'라고만 부르겠다 합니다.”", leftBtn: "그러시오", rightBtn: "군신의 예를 지키시오", leftEffect: [-10, 15, 0, 0, 0], rightEffect: [10, -15, 0, 0, 0] },
+        { onlyPhase1: true, text: "“척준경이 이자겸에게 서운함을 느끼고 있습니다. 누구에게 선물을 보낼까요?”", leftBtn: "장인에게 밉보일 이유는 없다", rightBtn: "용맹한 장군을 위로한다", leftEffect: [0, 10, -5, -5, 0], rightEffect: [5, -5, 15, -5, 0] },
+        { onlyPhase1: true, text: "“가뭄이 심각해져서 강의 바닥이 보일 정도입니다.”", leftBtn: "기우제를 올리자", rightBtn: "개입하지 않는다", leftEffect: [0, 0, 0, -10, 10], rightEffect: [0, 0, 0, 0, -10] },
+        { onlyPhase1: true, text: "“궁궐 정원에서 쌍둥이 봉황새가 나타났다는 소문이 돌고 있습니다.”", leftBtn: "길조를 널리 퍼트려라", rightBtn: "이는 왕실의 복이다", leftEffect: [5, 0, 0, 0, 10], rightEffect: [10, 0, 0, 0, 5] },
+        { onlyPhase1: true, text: "“군대의 비축 군량미가 썩어서 못 쓰게 되었습니다.”", leftBtn: "알맹이와 쭉정이는 분리해야지", rightBtn: "다시 채워넣어라", leftEffect: [0, 0, 5, 0, 0], rightEffect: [0, 0, 10, -15, 0] },
+        { onlyPhase1: true, text: "“금나라 사신이 고려에 머무는 동안 횡포를 부리고 있습니다.”", leftBtn: "감내해라", rightBtn: "서신으로 불쾌감을 표현해라", leftEffect: [-5, 0, 0, 0, -5], rightEffect: [5, 0, 5, 0, 5] },
+        { onlyPhase1: true, text: "“척준경이 궁궐에서 나무를 들어올려 휘두르는 기예를 선보였습니다.”", leftBtn: "그대는 고려의 보배다!", rightBtn: "재미있는 묘기로군!", leftEffect: [0, -5, 15, 0, 0], rightEffect: [5, 0, 5, 0, 0] },
+        { onlyPhase1: true, text: "“척준경의 먼 친척이 재판에 휘말려, 은밀히 편의를 봐달라 청탁합니다.”", leftBtn: "체면을 세워준다", rightBtn: "재판은 공정해야한다", leftEffect: [0, 0, 10, 0, -10], rightEffect: [5, 0, -10, 0, 10] },
 
-        // =================================================================
-        // [1페이즈: 사료 기반 내정 및 징조] (onlyPhase1: true)
-        // =================================================================
-        { 
-            onlyPhase1: true, text: "“신봉문(神鳳門)에 행차하여 죄인들을 사면하시겠습니까?”", 
-            leftBtn: "덕을 베풀라", rightBtn: "법은 엄격해야 한다", 
-            leftEffect: [5, 0, 0, 0, 10], rightEffect: [0, 0, 5, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“김부식 등이 선왕의 기록인 '예종실록' 편찬을 시작하겠다고 합니다.”", 
-            leftBtn: "지원을 아끼지 마라", rightBtn: "국고를 아껴라", 
-            leftEffect: [5, -5, 0, -10, 0], rightEffect: [0, 0, 0, 5, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“팔관회를 열어 부처님의 힘으로 나라의 안녕을 빌 시기가 되었습니다.”", 
-            leftBtn: "성대하게 열어라", rightBtn: "간소하게 하라", 
-            leftEffect: [0, 0, 0, -15, 10], rightEffect: [0, 0, 0, 5, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“동여진 추장이 화친의 의미로 좋은 말을 바쳤습니다.”", 
-            leftBtn: "하사품을 내려라", rightBtn: "경계해야 한다", 
-            leftEffect: [0, 0, 5, -5, 0], rightEffect: [0, 0, -5, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“송나라 사신이 전하께 정식으로 책봉을 요청하라고 귀띔했습니다.”", 
-            leftBtn: "사신을 보내라", rightBtn: "우리는 독자적이다", 
-            leftEffect: [10, 0, 0, -5, 0], rightEffect: [-5, 0, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“이자겸 대감이 공을 인정받아 '조선국공(朝鮮國公)'의 지위에 오르길 원합니다.”", 
-            leftBtn: "허락한다...", rightBtn: "그건 왕의 지위다!", 
-            leftEffect: [-15, 25, 0, 0, 0], rightEffect: [10, -20, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“이자겸 대감이 자신의 집으로 전하를 초대해 밤늦게까지 잔치를 열자고 합니다.”", 
-            leftBtn: "장인의 청이니 가자", rightBtn: "체통을 지켜야 한다", 
-            leftEffect: [-5, 10, 0, 0, 0], rightEffect: [5, -5, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“금나라가 우리 국서가 표문(신하의 글) 형식이 아니라며 받지 않고 돌려보냈습니다!”", 
-            leftBtn: "굴욕적이지만 고쳐라", rightBtn: "오랑캐 주제에!", 
-            leftEffect: [-10, 0, 0, 0, 0], rightEffect: [5, 0, 10, -5, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“잡류(천한 출신)의 자손들이 관직에 오르는 것을 제한해야 한다는 상소입니다.”", 
-            leftBtn: "기강을 바로잡아라", rightBtn: "능력이 중요하다", 
-            leftEffect: [0, 5, 0, 0, -5], rightEffect: [0, -5, 0, 0, 5] 
-        },
-        { 
-            onlyPhase1: true, text: "“요나라(거란)로 보낸 사신이 길이 막혀 도착하지 못하고 돌아왔습니다. 국제 정세가 심상치 않습니다.”", 
-            leftBtn: "금나라와 친해지자", rightBtn: "송나라를 믿자", 
-            leftEffect: [0, 5, -5, 0, 0], rightEffect: [5, 0, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“가뭄이 계속되고 있습니다. 무당을 모아 비를 빌어야 한다는 건의가 있습니다.”", 
-            leftBtn: "기우제를 지내라", rightBtn: "미신일 뿐이다", 
-            leftEffect: [0, 0, 0, -5, 5], rightEffect: [0, 0, 0, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“억울함을 호소하는 죄수들이 많습니다. 재심을 하시겠습니까?”", 
-            leftBtn: "다시 살펴라", rightBtn: "판결은 유지된다", 
-            leftEffect: [5, 0, 0, 0, 5], rightEffect: [0, 0, 0, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“지방의 주(州)와 진(鎭)을 지키는 장교들의 녹봉(월급) 기준을 정해야 합니다.”", 
-            leftBtn: "후하게 줘라", rightBtn: "적당히 줘라", 
-            leftEffect: [0, 0, 10, -10, 0], rightEffect: [0, 0, -5, 5, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“탐관오리들이 국법을 교묘하게 악용해 백성들을 수탈하고 있습니다.”", 
-            leftBtn: "엄벌에 처하라!", rightBtn: "관료들을 믿어보자", 
-            leftEffect: [5, -5, 0, 0, 10], rightEffect: [-5, 5, 0, 0, -10] 
-        },
-        { 
-            onlyPhase1: true, text: "“과거 시험 합격자 명단이 올라왔습니다. 누구를 등용하시겠습니까?”", 
-            leftBtn: "능력 위주로 뽑아라", rightBtn: "추천받은 자를 뽑아라", 
-            leftEffect: [5, -5, 0, 0, 0], rightEffect: [-5, 10, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“대낮에 해가 빛을 잃었습니다(일식)! 왕의 부덕함을 경고하는 하늘의 뜻입니다.”", 
-            leftBtn: "자숙하고 반성한다", rightBtn: "자연 현상일 뿐이다", 
-            leftEffect: [-5, 0, 0, 0, 5], rightEffect: [0, 0, 0, 0, -5] 
-        },
-        { 
-            onlyPhase1: true, text: "“정기 인사를 단행할 시기입니다. 주요 관직을 어떻게 채우시겠습니까?”", 
-            leftBtn: "내 사람을 심는다", rightBtn: "외척에게 자문을 구한다", 
-            leftEffect: [10, -10, 0, 0, 0], rightEffect: [-10, 15, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“멸망해가는 거란(요나라)에서 사신을 보내 구원을 요청했습니다.”", 
-            leftBtn: "사신을 맞이하라", rightBtn: "금나라 눈치가 보인다", 
-            leftEffect: [0, 0, 5, -5, 0], rightEffect: [0, 0, 0, 0, 0] 
-        },
-        { 
-            onlyPhase1: true, text: "“하늘에 붉은 기운이 나타났습니다! 흉흉한 징조가 아니겠습니까?”", 
-            leftBtn: "경계를 강화하라", rightBtn: "무시해라", 
-            leftEffect: [0, 0, 5, -5, -5], rightEffect: [0, 0, 0, 0, 0] 
-        },
-
-        // =================================================================
-        // [2페이즈: 거사 이후 생존과 투쟁] (requirePhase2: true)
-        // =================================================================
-        { 
-            requirePhase2: true, text: "거사를 주도한 최탁, 안보린 등이 체포되었습니다. 이자겸이 처벌을 요구합니다.", 
-            leftBtn: "모두 내가 시킨 일이다", rightBtn: "나는 모르는 일이다", 
-            leftEffect: [15, -20, 0, 0, 10], rightEffect: [-20, 10, 0, 0, -10] 
-        },
-        { 
-            requirePhase2: true, text: "이자겸이 옥새를 내놓으라고 협박합니다. 붓과 종이를 가져왔습니다.", 
-            leftBtn: "네 이놈!", rightBtn: "알겠다...", 
-            leftEffect: [10, -15, 0, 0, 0], rightEffect: [-20, 15, 0, 0, 0] 
-        },
-        { 
-            requirePhase2: true, text: "이자겸이 전하의 거처를 자신의 집으로 옮기고자 합니다.", 
-            leftBtn: "내 궁궐은 이곳이다!", rightBtn: "잘 부탁합니다, 장인어른", 
-            leftEffect: [5, -10, 0, 0, 0], rightEffect: [-15, 10, 0, 0, 0] 
-        },
-	{ 
-            requirePhase2: true, text: "“이자겸 대감이 전하께 떡을 보냈습니다. 무언가 수상합니다.”", 
-            leftBtn: "장인의 정성인데...", rightBtn: "새에게 던져라", 
-            leftEffect: [0, 0, 0, 0, 0], isPoison: true, rightEffect: [5, -10, 0, 0, 0] 
-        },
+        // [2페이즈]
+        { requirePhase2: true, text: "거사를 주도한 최탁, 안보린 등이 체포되었습니다. 이자겸이 처벌을 요구합니다.", leftBtn: "모두 내가 시킨 일이다", rightBtn: "나는 모르는 일이다", leftEffect: [15, -20, 0, 0, 10], rightEffect: [-20, 10, 0, 0, -10] },
+        { requirePhase2: true, text: "이자겸이 옥새를 내놓으라고 협박합니다. 붓과 종이를 가져왔습니다.", leftBtn: "네 이놈!", rightBtn: "알겠다...", leftEffect: [10, -15, 0, 0, 0], rightEffect: [-20, 15, 0, 0, 0] },
+        { requirePhase2: true, text: "이자겸이 전하의 거처를 자신의 집으로 옮기고자 합니다.", leftBtn: "내 궁궐은 이곳이다!", rightBtn: "잘 부탁합니다, 장인어른", leftEffect: [5, -10, 0, 0, 0], rightEffect: [-15, 10, 0, 0, 0] },
+	{ requirePhase2: true, text: "이자겸 대감이 전하께 떡을 보냈습니다. 무언가 수상합니다.", leftBtn: "장인의 정성인데...", rightBtn: "새에게 던져라", leftEffect: [0, 0, 0, 0, 0], isPoison: true, rightEffect: [5, -10, 0, 0, 0] }
     ];
 
-    window.onload = function() { document.getElementById("intro-text").innerHTML = introLines[0]; renderStats(); pickNewCard(); };
+    window.onload = function() { 
+        showIntroText(); // 로딩 시 첫 텍스트 표시
+        renderStats(); 
+        pickNewCard(); 
+    };
 
     function resetGame() {
         stats = { royal: 50, kin: 50, military: 50, money: 50, public: 50 };
-        turn = 1; isPhase2 = false; 
-        phase2StartTurn = 0;
-      
+        turn = 1; isPhase2 = false; phase2StartTurn = 0;
+        
         randomDeck.forEach(c => c.hasPlayed = false);
 
         document.body.classList.remove("phase-fire");
         document.getElementById("game-over-screen").style.display="none";
-        document.getElementById("intro-screen").style.display="none"; 
+        document.getElementById("intro-screen").style.display="none"; // 바로 게임 시작
         document.getElementById("game-container").style.opacity=1;
-	document.querySelector(".history-paper").classList.remove("open-effect");
-
-        document.body.classList.remove("phase-fire");
-        document.getElementById("game-over-screen").style.display="none";
+        document.querySelector(".history-paper").classList.remove("open-effect");
 
         renderStats(); pickNewCard(); initSwipe();
     }
@@ -756,13 +524,23 @@
             }
         }
 
-        // [46턴 & 51턴 긴급 이펙트]
-        if (currentCard.id === 46 || currentCard.id === 51) {
-            document.getElementById("warning-overlay").style.display = "block";
-            document.getElementById("game-container").classList.add("shake-effect");
-        } else {
-            document.getElementById("warning-overlay").style.display = "none";
-            document.getElementById("game-container").classList.remove("shake-effect");
+        const overlay = document.getElementById("warning-overlay");
+        const container = document.getElementById("game-container");
+
+        if (currentCard.id === 45) {
+            overlay.classList.add("hint");
+            overlay.style.display = "block";
+            container.classList.remove("shake-effect"); 
+        } 
+        else if (currentCard.id === 46 || currentCard.id === 51) {
+            overlay.classList.remove("hint");
+            overlay.style.display = "block";
+            container.classList.add("shake-effect");
+        } 
+        else {
+            overlay.classList.remove("hint");
+            overlay.style.display = "none";
+            container.classList.remove("shake-effect");
         }
 
         updateUI();
@@ -778,7 +556,6 @@
             if (card.requirePhase2 && !isPhase2) phaseMatch = false; 
             if (card.onlyPhase1 && isPhase2) phaseMatch = false;
 
-            // [NEW] 이미 등장한 카드는 제외 (!card.hasPlayed)
             if (card.hasPlayed) return false;
 
             return turnMatch && phaseMatch;
@@ -786,16 +563,25 @@
 
         if (validCards.length > 0) {
             currentCard = validCards[Math.floor(Math.random() * validCards.length)];
-            // [NEW] 뽑힌 카드는 '등장함'으로 표시하여 다시 안 나오게 함
             currentCard.hasPlayed = true;
         } else {
-            // 카드가 전부 소진되면 나오는 기본 카드 (반복 가능)
             currentCard = { text: "평온한 한 달이 지나갑니다.", leftBtn: "국정 살피기", rightBtn: "휴식", leftEffect:[0,0,0,0,0], rightEffect:[0,0,0,0,0] };
         }
     }
 
     function updateUI() {
         document.getElementById("question-text").innerHTML = currentCard.text;
+
+	if (isPhase2) {
+            document.getElementById("label-royal").innerText = "인종";
+            document.getElementById("label-kin").innerText = "이자겸";
+            document.getElementById("label-military").innerText = "척준경";
+        } else {
+            // 1페이즈거나 리셋되었을 때 원상복구
+            document.getElementById("label-royal").innerText = "왕권";
+            document.getElementById("label-kin").innerText = "외척";
+            document.getElementById("label-military").innerText = "군사";
+        }
 
         let dateString = "";
         
@@ -805,8 +591,8 @@
             dateString = `(인종 ${y}년 ${m}월)`;
         } else {
             let weeksPassed = (turn - phase2StartTurn) + 1;
-            let startTotalMonths = phase2StartTurn - 1; // 거사 시작 전까지의 총 개월 수
-            let addedMonths = Math.floor((turn - phase2StartTurn) / 4); // 4턴(4주)마다 1달 추가
+            let startTotalMonths = phase2StartTurn - 1; 
+            let addedMonths = Math.floor((turn - phase2StartTurn) / 4); 
             
             let currentTotalMonths = startTotalMonths + addedMonths;
             
@@ -855,20 +641,15 @@
     function hidePreview() { for(let i=0; i<5; i++) document.getElementById(`ind-${i}`).classList.remove("active"); }
 
     function makeChoice(ch) {
-        // 1. 이펙트 해제
         document.getElementById("warning-overlay").style.display = "none";
         document.getElementById("game-container").classList.remove("shake-effect");
 
-        // 2. 독살 체크
         if (currentCard.isPoison && ch === 0) {
             unlockAchievement("die_poison");
-            document.getElementById("end-title").innerText = "독살";
-            document.getElementById("end-message").innerText = "떡에 든 맹독이 퍼져 손쓸 새도 없이 승하하셨습니다.";
-            document.getElementById("game-over-screen").style.display = "flex";
+            checkGameOver(true, "독살", "떡에 든 맹독이 퍼져 손쓸 새도 없이 승하하셨습니다.");
             return;
         }
 
-        // 3. 2페이즈 진입 체크
         if ((currentCard.id === 46 && ch === 0) || currentCard.id === 51) {
             if (!isPhase2) {
                 isPhase2 = true;
@@ -876,12 +657,12 @@
             }
         }
 
-        // 4. 스탯 반영
         let eff = (ch===0)?currentCard.leftEffect : (ch===1)?currentCard.rightEffect : (currentCard.downEffect||[0,0,0,0,0]);
         stats.royal += eff[0]||0; stats.kin += eff[1]||0; stats.military += eff[2]||0;
         stats.money += eff[3]||0; stats.public += eff[4]||0;
+	if (stats.money >= 100) unlockAchievement("max_money");
+        if (stats.public >= 100) unlockAchievement("max_public");
         
-        // 5. 연계 이벤트 예약 확인
         let hasNextEvent = false;
 
         if (ch === 0 && currentCard.leftNext) {
@@ -895,14 +676,12 @@
             hasNextEvent = true;
         }
 
-        // 업적 체크
         if (turn === 50) unlockAchievement("turn_50");
         if (turn === 100) unlockAchievement("turn_100");
 
         renderStats(); 
 
         if(!checkGameOver()) { 
-            // 6. 연계 이벤트가 없을 때만 턴 증가
             if (!hasNextEvent) {
                 turn++; 
             }
@@ -910,13 +689,11 @@
         }
     }
 
-   
-// [수정] 게임 오버 체크 및 사료 생성 호출
-    function checkGameOver() {
+    function checkGameOver(force=false, fTitle="", fMsg="") {
         let t="패배", m="", over=false;
         
-        // 엔딩 조건 체크 (기존 로직 유지)
-        if(stats.royal<=0){ t="폐위"; m="왕위의 기둥이 무너지고, 결국 신하들에 의해 폐위되었습니다."; unlockAchievement("die_royal"); over=true; }
+        if (force) { t=fTitle; m=fMsg; over=true; }
+        else if(stats.royal<=0){ t="폐위"; m="왕위의 기둥이 무너지고, 결국 신하들에 의해 폐위되었습니다."; unlockAchievement("die_royal"); over=true; }
         else if(stats.kin<=0){ t="독살"; m="지나친 견제에 위기감을 느낀 외척에게 독살당했습니다."; unlockAchievement("die_poison"); over=true; }
         else if(stats.kin>=100){ t="꼭두각시"; m="외척의 손아귀에 조정이 넘어가고, 허수아비 임금이 되었습니다."; unlockAchievement("die_kin"); over=true; }
         else if(stats.military<=0){ t="함락"; m="군세가 흩어지자 북방이 무너지고, 고려가 오랑캐의 발 아래에 짓밟힙니다."; unlockAchievement("die_military"); over=true; }
@@ -928,48 +705,43 @@
         if(over) {
             generateHistory(t, m);
             const screen = document.getElementById("game-over-screen");
+            document.getElementById("game-container").style.opacity = 0; 
             screen.style.display = "flex";
             
-            // (setTimeout이 없으면 애니메이션이 씹힐 수 있음)
             setTimeout(() => {
                 document.querySelector(".history-paper").classList.add("open-effect");
             }, 50);
-            
             return true;
         }
         return false;
     }
+
     function generateHistory(title, reason) {
         const content = document.getElementById("history-content");
         
-        // 1. 재위 기간 계산
         let years = Math.floor((turn-1)/12)+1;
         let months = (turn-1)%12+1;
         let reignTime = `인종 ${years}년 ${months}월`;
 
-        // 2. 업적(기록) 목록 동적 생성
         let records = [];
         if (turn > 12) records.push(`즉위 초, 이자겸의 위세 속에서도 ${years}년 넘게 버티었다.`);
         if (isPhase2) records.push("이자겸의 전횡에 맞서 거사를 도모하였다.");
         if (phase2StartTurn > 0 && turn - phase2StartTurn > 4) records.push("거사 실패 후에도 끈질기게 저항하며 기회를 엿보았다.");
         
-        // 스탯 기반 기록
         if (stats.money > 80) records.push("국고를 가득 채워 나라의 살림을 윤택하게 했다.");
         if (stats.public > 80) records.push("백성들의 목소리에 귀를 기울여 성군의 자질을 보였다.");
         if (stats.military > 80) records.push("군사력을 강하게 키워 북방을 경계했다.");
         
-        // 3. 사관의 말 (엔딩 타입에 따른 평가)
         let evaluation = "";
         switch(title) {
-            case "군주": evaluation = "왕은 지혜롭고 용맹하여 외척의 발호를 누르고 왕실의 위엄을 되찾았다. 후세의 왕들이 그를 본받아..."; break;
-            case "독살": case "폐위": evaluation = "왕은 뜻을 펴보려 했으나, 시대의 흐름과 간신들의 횡포를 이겨내지 못했다."; break;
-            case "허수아비": evaluation = "왕좌에 있었으나 왕이 아니었다. 권력은 신하에게 있었으니, 이를 어찌 왕이라 하겠는가."; break;
+            case "군주": evaluation = "왕은 지혜롭고 용맹하여 외척의 발호를 누르고 왕실의 위엄을 되찾았다. "; break;
+            case "독살": case "폐위": evaluation = "왕은 뜻을 펴보려 했으나, 시대의 흐름과 외척의 횡포를 이겨내지 못했다."; break;
+            case "허수아비": evaluation = "왕좌에 있었으나 왕은 아니었다. 권력은 신하에게 있었으니, 이를 어찌 왕이라 하겠는가."; break;
             case "정변": case "함락": evaluation = "무력을 통제하지 못해 스스로 화를 불렀다. 칼로 흥한 자, 칼로 망하는 법."; break;
-            case "국가 부도": case "민란": evaluation = "백성의 삶을 돌보지 않고 근본을 잃었으니, 천명(天命)이 떠난 것은 당연한 이치."; break;
+            case "파산": case "민란": evaluation = "백성의 삶을 돌보지 않고 근본을 잃었으니, 천명(天命)이 떠난 것은 당연한 이치."; break;
             default: evaluation = "왕의 치세는 짧고 덧없었다. 역사는 그를 비운의 군주로 기억할 것이다.";
         }
 
-        // 4. HTML 조립
         let html = `
             <div class="history-section">
                 <span class="history-label">▣ 재위:</span>
@@ -990,7 +762,6 @@
                 <span class="history-text" style="font-style: italic;">"${evaluation}"</span>
             </div>
         `;
-        
         content.innerHTML = html;
     }
 
