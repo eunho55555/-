@@ -31,7 +31,8 @@
         .game-container { z-index: 1; }
         .warning-overlay { z-index: 10; }
         .intro-overlay { z-index: 9999; }
-        .game-over-overlay { z-index: 10000; }
+        .ending-message-overlay { z-index: 10000; }
+        .game-over-overlay { z-index: 10001; }
         .achieve-modal { z-index: 20000; }
         .toast { z-index: 30000; }
         .achieve-btn { z-index: 30000; }
@@ -46,12 +47,10 @@
         }
         .intro-text { 
             font-size: 22px; font-weight: bold; line-height: 1.8; margin-bottom: 50px; 
-            opacity: 0; /* 초기엔 투명 */
+            opacity: 0; 
             max-width: 80%; pointer-events: none; 
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); 
         }
-        
-        /* 인트로 애니메이션 클래스 */
         .intro-text.show { animation: fadeIn 1.5s forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -147,15 +146,30 @@
             text-align: center; font-size: 32px; font-weight: 900; color: #e74c3c; opacity: 0; pointer-events: none;
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
+        .choice-overlay.locked {
+            color: #7f8c8d !important; text-decoration: line-through;
+        }
 
-        /* [게임 오버 & 사료 엔딩 화면] */
+        /* [1단계 엔딩 메시지 화면] */
+        .ending-message-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: black; flex-direction: column;
+            align-items: center; justify-content: center; color: white; text-align: center;
+            padding: 30px; box-sizing: border-box; cursor: pointer;
+        }
+        .ending-title { font-size: 40px; color: #e74c3c; margin-bottom: 30px; font-weight: bold; }
+        .ending-reason { font-size: 20px; line-height: 1.6; color: #ecf0f1; max-width: 80%; }
+        .tap-hint { margin-top: 50px; font-size: 12px; color: #7f8c8d; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* [2단계 사료 엔딩 화면] */
         .game-over-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.95); flex-direction: column;
             align-items: center; justify-content: center; color: white; text-align: center;
         }
 
-        /* 사료 종이 스타일 (고풍스러운 두루마리) */
+        /* 사료 종이 스타일 */
         .history-paper {
             width: 85%; max-width: 400px;
             background: linear-gradient(to bottom, #f4e4bc, #e8d5a7);
@@ -254,15 +268,18 @@
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-0"></div>
                 <div class="stat-item"><div class="stat-icon">👑</div><div class="stat-fill" id="fill-royal"></div></div>
-                <div class="stat-name" id="label-royal">왕권</div> </div>
+                <div class="stat-name" id="label-royal">왕권</div>
+            </div>
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-1"></div>
                 <div class="stat-item"><div class="stat-icon">🐍</div><div class="stat-fill" id="fill-kin"></div></div>
-                <div class="stat-name" id="label-kin">외척</div> </div>
+                <div class="stat-name" id="label-kin">외척</div>
+            </div>
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-2"></div>
                 <div class="stat-item"><div class="stat-icon">⚔️</div><div class="stat-fill" id="fill-military"></div></div>
-                <div class="stat-name" id="label-military">군사</div> </div>
+                <div class="stat-name" id="label-military">군사</div>
+            </div>
         </div>
 
         <div class="card-container">
@@ -292,6 +309,12 @@
         </div>
     </div>
 
+    <div id="ending-msg-screen" class="ending-message-overlay" onclick="showHistoryScroll()">
+        <h1 id="end-title-msg" class="ending-title">패배</h1>
+        <p id="end-reason-msg" class="ending-reason">사유</p>
+        <div class="tap-hint">▼ 화면을 터치하여 기록 보기</div>
+    </div>
+
     <div id="game-over-screen" class="game-over-overlay">
         <div class="history-paper">
             <h2 class="history-title">고려사(高麗史) - 인종 세가</h2>
@@ -302,21 +325,22 @@
     </div>
 
     <script>
-    // --------------------------------------------------------------------------------
     // [시스템] 업적 데이터 및 함수 (LocalStorage 사용)
-    // --------------------------------------------------------------------------------
     const achievements = [
-        { id: "win_balance", icon: "👑", title: "진정한 왕", desc: "이자겸을 몰아내고 고려의 균형을 되찾다." },
+        { id: "win_balance", icon: "👑", title: "균형의 왕", desc: "척준경을 회유해 이자겸을 몰아내고 고려의 균형을 되찾다." },
         { id: "die_poison", icon: "💀", title: "비운의 미식가", desc: "수상한 떡을 먹고 생을 마감하다." },
         { id: "die_royal", icon: "🥀", title: "잊혀진 왕", desc: "왕권이 바닥나 폐위되다." },
         { id: "die_kin", icon: "🎭", title: "꼭두각시", desc: "외척의 힘이 너무 강해져 꼭두각시가 되다." },
         { id: "die_military", icon: "⚔️", title: "군부의 희생양", desc: "군부의 힘이 강해지거나, 반란으로 사망하다." },
         { id: "die_money", icon: "💸", title: "파산 신청", desc: "국고 탕진으로 고려가 망하다." },
         { id: "die_public", icon: "🔥", title: "성난 민심", desc: "민란이 일어나 궁궐이 불타다." },
-        { id: "turn_50", icon: "⏳", title: "절반의 성공", desc: "50턴(약 4년)을 버티다." },
-        { id: "turn_100", icon: "📜", title: "장수왕", desc: "100턴 이상 장기 집권하다." },
-	{ id: "max_money", icon: "💰", title: "부국", desc: "국고가 가득 차 넘쳐 부유한 나라를 이루다." },
-        { id: "max_public", icon: "🙏", title: "성군", desc: "민심이 하늘을 찌르니 실로 만백성의 어버이라 할만하다." }
+        { id: "turn_50", icon: "⏳", title: "절반의 성공", desc: "2년 반(30턴)을 버티다." },
+        { id: "turn_100", icon: "📜", title: "장수왕", desc: "약 4년(60턴) 이상 장기 집권하다." },
+        { id: "max_money", icon: "💰", title: "부국", desc: "국고가 가득 차 넘쳐 부유한 나라를 이루다." },
+        { id: "max_public", icon: "🙏", title: "성군", desc: "민심이 하늘을 찌르니 실로 만백성의 어버이라 할만하다." },
+        { id: "die_tyrant", icon: "🩸", title: "폭군", desc: "왕권이 폭주하여 공포 정치를 펼치다 쫓겨나다." },
+        { id: "die_fall", icon: "🐴", title: "낙마", desc: "사냥 중 불의의 사고로 생을 마감하다." },
+        { id: "win_true", icon: "☀️", title: "명군", desc: "압도적인 왕권과 민심으로 외척과 군부를 제압하고 평화를 되찾다." }
     ];
 
     function getUnlockedData() {
@@ -369,14 +393,12 @@
 
     let introIndex = 0;
     
-    // [중요] 인트로 텍스트 표시 함수
     function showIntroText() {
         const txt = document.getElementById("intro-text");
         if(introIndex < introLines.length) {
             txt.innerHTML = introLines[introIndex]; 
-            // 애니메이션 재시작을 위한 꼼수
             txt.classList.remove("show");
-            void txt.offsetWidth; // 리플로우 강제
+            void txt.offsetWidth; 
             txt.classList.add("show");
         } else {
             const sc = document.getElementById("intro-screen"); 
@@ -402,29 +424,54 @@
     let nextEventCard = null;
     let isPhase2 = false;
     let phase2StartTurn = 0;
+    let cheokRandomTurn = 0; // 척준경 불만 이벤트 랜덤 턴
 
     // [데이터 1] 연계 이벤트
-    const event_fire_loot = {
-        text: "“불이 서적과 보물이 가득한 전각으로 번지고 있습니다!”", leftBtn: "왕실 서적을 옮겨라", rightBtn: "보물을 챙겨라", leftEffect: [5, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 20, -10], requirePhase2: true };
+    const event_fire_loot = { text: "“불이 서적과 보물이 가득한 전각으로 번지고 있습니다!”", leftBtn: "왕실 서적을 옮겨라", rightBtn: "보물을 챙겨라", leftEffect: [5, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 20, -10], requirePhase2: true };
     const event_arson = { text: "“척준경이 결국 궁에 불을 질렀습니다! 연경궁이 타고 있습니다!”", leftBtn: "불부터 꺼라", rightBtn: "도망치자", leftEffect: [0, 0, 0, -10, 5], rightEffect: [-20, 0, 0, 0, -20], leftNext: event_fire_loot, rightNext: event_fire_loot, requirePhase2: true };
     const event_seungpyeong_gate = { text: "“반란군이 승평문(昇平門) 앞까지 들이닥쳤습니다! 척준경이 문을 부수려 합니다!”", leftBtn: "활을 쏘아 맞서라!", rightBtn: "일단 대화로 시간을 끌어라",  leftEffect: [10, -20, -10, 0, 0], rightEffect: [-10, 0, 0, 0, 0], leftNext: event_arson, rightNext: event_arson, requirePhase2: true };
     const event_cheok_rage = {text: "“척준경의 동생과 아들이 우리 군사에게 죽었습니다! 척준경이 분노하여 달려옵니다!”", leftBtn: "성문을 잠궈라!", rightBtn: "오해였다고 전해라", leftEffect: [0, 0, -10, 0, -10], rightEffect: [-10, 0, 0, 0, 0], leftNext: event_seungpyeong_gate, rightNext: event_seungpyeong_gate,  requirePhase2: true };
+    
+    // 군주 엔딩 트리거
+    const event_persuade_cheok = {
+        id: "persuade_cheok",
+        text: "“전하! 척준경이 이자겸에게 큰 배신감을 느끼고 있습니다. 왕권과 군사력도 충분합니다. 지금 명을 내리시면 그가 이자겸을 벨 것입니다!”",
+        leftBtn: "척준경을 시켜 이자겸을 쳐라! (승리)", 
+        rightBtn: "아직은 불안하다... (기회 박탈)",
+        leftEffect: [0, 0, 0, 0, 0], 
+        rightEffect: [-15, 5, -10, 0, 0] 
+    };
+
+    // 척준경 회유 실패 이벤트
+    const event_persuade_fail = {
+        id: "persuade_fail",
+        text: "“척준경은 잠시 흥미를 보였으나, 당신의 위세를 가늠해보고는 이내 실망한 듯 고개를 저으며 돌아섭니다.”",
+        leftBtn: "끝났구나...", rightBtn: "이럴 수가...", 
+        leftEffect: [0, 0, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0]
+    };
+
+    // 척준경 불만 이벤트 (1페이즈 랜덤)
+    const event_cheok_rumor = {
+        text: "“다른 무신들이 척준경의 드높은 위세에 불만을 품고 있다는 소문이 파다합니다.”",
+        leftBtn: "척준경은 나의 공신이다", rightBtn: "자중하라고 이르겠다",
+        leftEffect: [-5, 0, 10, 0, 0], rightEffect: [5, 0, -10, 0, 0]
+    };
 
     // [데이터 2] 스토리 덱
     const storyDeck = [
-        { id: 1, text: "“전하의 즉위에 이자겸 대감이 손을 쓴 것으로 보입니다.”", leftBtn: "감사를 표하라", rightBtn: "그래서 어쩌라고?", leftEffect: [-10, 10, 0, 0, 0], rightEffect: [10, -10, 0, 0, 0], downBtn: "침묵한다", downEffect: [0, 0, 0, 0, 0] },
+        { id: 1, text: "“전하의 즉위에 이자겸 대감이 손을 쓴 것으로 보입니다.”", leftBtn: "감사를 표하라", rightBtn: "그게 무슨 상관이지?", leftEffect: [-10, 10, 0, 0, 0], rightEffect: [10, -10, 0, 0, 0], downBtn: "침묵한다", downEffect: [0, 0, 0, 0, 0] },
         { id: 45, text: "“영통사 북쪽에서 까마귀 떼가 시끄럽게 울며 서로 싸우고 있습니다. 흉조가 분명합니다.”", leftBtn: "제사를 지내 액운을 막아라", rightBtn: "미물들의 다툼일 뿐이다", leftEffect: [0, 0, 0, -10, 10], rightEffect: [5, 0, 0, 0, -10] }, 
         { id: 46, text: "“폐하, 불만을 품은 무신들이 이자겸을 치자고 제안합니다. 이자겸과 척준경을 제거할 수 있는 기회일지도 모릅니다...”", leftBtn: "지금이 기회다!", rightBtn: "그들에게 빌미를 줄 뿐이다", leftEffect: [10, -30, 10, 0, 0], leftNext: event_cheok_rage, rightEffect: [-5, 5, 0, 0, 0] },
         { id: 51, text: "“폐하! 혈기 왕성한 측근들이 참지 못하고 독단적으로 이자겸의 집을 공격했습니다!”", leftBtn: "이왕 이렇게 된 거 쳐라!", rightBtn: "어리석은 놈들...", leftEffect: [0, 0, 0, 0, 0], leftNext: event_cheok_rage, rightEffect: [0, 0, 0, 0, 0], rightNext: event_cheok_rage, downBtn: "침묵한다", downEffect: [0, 0, 0, 0, 0], downNext: event_cheok_rage }
     ];
 
-    // [데이터 3] 랜덤 덱 (최종 통합본)
+    // [데이터 3] 랜덤 덱 
     const randomDeck = [
+        // [1페이즈]
         { onlyPhase1: true, text: "“전하, 이자겸 대감께서 셋째 딸을 전하의 비로 맞이하라고 하십니다.”", leftBtn: "이모와 결혼이라니!", rightBtn: "받아들여라", leftEffect: [5, -15, 0, 0, 5], rightEffect: [-10, 15, 0, 0, -5] },
         { onlyPhase1: true, text: "“대감의 사촌의 팔촌을 장군으로 임명하라는 상소가 올라왔습니다.”", leftBtn: "시키는 대로 해", rightBtn: "능력이 우선이다", leftEffect: [-5, 10, -5, 0, 0], rightEffect: [5, -10, 5, 0, 0] },
         { onlyPhase1: true, text: "“이자겸 대감의 생신입니다. 선물을 보내시겠습니까?”", leftBtn: "화려하게 보내라!", rightBtn: "마음만 전해라", leftEffect: [0, 10, 0, -15, 0], rightEffect: [0, -5, 0, 0, 0] },
         { onlyPhase1: true, text: "“시중에 '십자(十八子: 이씨)가 왕이 된다'는 소문이 돌고 있습니다.”", leftBtn: "헛소문이다!", rightBtn: "흥미롭군...", leftEffect: [-5, 5, 0, 0, 0], rightEffect: [5, -10, 0, 0, 0] },
-        { onlyPhase1: true, text: "“이자겸 대감이 전하께 떡을 보냈습니다. 무언가 수상합니다.”", leftBtn: "장인의 정성인데...", rightBtn: "새에게 던져라", leftEffect: [0, 0, 0, 0, 0], isPoison: true, rightEffect: [5, -10, 0, 0, 0] },
         { onlyPhase1: true, text: "“왕실의 재정과 이자겸 가문의 재정이 섞여 국고 파악이 어렵습니다.”", leftBtn: "분리 개혁을 추진하라", rightBtn: "장인이 알아서 하겠지", leftEffect: [5, -10, 0, 5, 0], rightEffect: [-5, 10, 0, -5, 0] },
         { onlyPhase1: true, text: "“신하들이 중앙군의 규모를 두 배로 늘리자고 제안합니다.”", leftBtn: "비밀리에 진행한다", rightBtn: "돈이 문제다", leftEffect: [0, -5, 10, -10, 0], rightEffect: [0, 0, -5, 5, 0] },
         { onlyPhase1: true, text: "“올해는 풍년입니다. 백성들이 수확한 곡식 덕분에 국고가 채워졌습니다.”", leftBtn: "세금을 낮춰라", rightBtn: "전부 짐의 것이다!", leftEffect: [0, 0, 0, -5, 15], rightEffect: [0, 0, 0, 15, -15] },
@@ -445,7 +492,9 @@
         { onlyPhase1: true, text: "“이자겸의 종들이 백성들의 땅을 뺏어 수레에 싣고 있습니다.”", leftBtn: "어쩔 수 없다...", rightBtn: "수레를 엎어라!", leftEffect: [-5, 5, 0, 0, -10], rightEffect: [5, -10, 0, 0, 10] },
         { onlyPhase1: true, text: "“이자겸이 집에 '숭덕부'라는 관청을 세우고 독자적으로 정치를 하려 합니다.”", leftBtn: "수고를 덜어주니...", rightBtn: "왕이 둘이냐?", leftEffect: [-10, 15, 0, 0, 0], rightEffect: [10, -15, 0, 0, 0] },
         { onlyPhase1: true, text: "“이자겸이 몰래 사병을 기르고 무기를 사들이고 있다는 첩보입니다.”", leftBtn: "나라를 위해서겠지", rightBtn: "우리도 모으자", leftEffect: [-5, 5, -5, 0, 0], rightEffect: [5, -10, 10, -10, 0] },
-        { onlyPhase1: true, text: "“매형(이자겸의 아들)이 사냥을 가자고 합니다. 화살이 어디로 날아올지 모릅니다.”", leftBtn: "겁먹을 순 없다", rightBtn: "아프다고 한다", leftEffect: [5, -5, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0] },
+        { onlyPhase1: true, 
+          isHunting: true, 
+          text: "“매형(이자겸의 아들)이 사냥을 가자고 합니다. 화살이 어디로 날아올지 모릅니다.”", leftBtn: "겁먹을 순 없다", rightBtn: "아프다고 한다", leftEffect: [5, -5, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0] },
         { onlyPhase1: true, text: "“척준경이 술에 취해 왕실 근위병을 폭행했습니다.”", leftBtn: "장군이 취했구려", rightBtn: "곤장을 쳐라", leftEffect: [-5, 0, 5, 0, -5], rightEffect: [5, 0, -15, 0, 5] },
         { onlyPhase1: true, text: "“서역 상인이 질 좋은 철검을 가지고 왔습니다.”", leftBtn: "모두 사들여라", rightBtn: "돈이 없다", leftEffect: [0, 0, 10, -15, 0], rightEffect: [0, 0, -5, 0, 0] },
         { onlyPhase1: true, text: "“신봉문(神鳳門)에 행차하여 죄인들을 사면하시겠습니까?”", leftBtn: "덕을 베풀라", rightBtn: "법은 엄격해야 한다", leftEffect: [5, 0, 0, 0, 10], rightEffect: [0, 0, 5, 0, -5] },
@@ -480,11 +529,22 @@
         { requirePhase2: true, text: "거사를 주도한 최탁, 안보린 등이 체포되었습니다. 이자겸이 처벌을 요구합니다.", leftBtn: "모두 내가 시킨 일이다", rightBtn: "나는 모르는 일이다", leftEffect: [15, -20, 0, 0, 10], rightEffect: [-20, 10, 0, 0, -10] },
         { requirePhase2: true, text: "이자겸이 옥새를 내놓으라고 협박합니다. 붓과 종이를 가져왔습니다.", leftBtn: "네 이놈!", rightBtn: "알겠다...", leftEffect: [10, -15, 0, 0, 0], rightEffect: [-20, 15, 0, 0, 0] },
         { requirePhase2: true, text: "이자겸이 전하의 거처를 자신의 집으로 옮기고자 합니다.", leftBtn: "내 궁궐은 이곳이다!", rightBtn: "잘 부탁합니다, 장인어른", leftEffect: [5, -10, 0, 0, 0], rightEffect: [-15, 10, 0, 0, 0] },
-	{ requirePhase2: true, text: "이자겸 대감이 전하께 떡을 보냈습니다. 무언가 수상합니다.", leftBtn: "장인의 정성인데...", rightBtn: "새에게 던져라", leftEffect: [0, 0, 0, 0, 0], isPoison: true, rightEffect: [5, -10, 0, 0, 0] }
-    ];
+        { requirePhase2: true, text: "이자겸 대감이 전하께 떡을 보냈습니다. 무언가 수상합니다.", leftBtn: "장인의 정성인데...", rightBtn: "새에게 던져라", leftEffect: [0, 0, 0, 0, 0], isPoison: true, rightEffect: [5, -10, 0, 0, 0] },
+        { requirePhase2: true, text: "“누런 안개가 사방을 덮어 한 치 앞도 분간할 수 없습니다.”", leftBtn: "간신이 가득하다는 뜻이다!", rightBtn: "내가 부덕한 탓이겠지…", leftEffect: [5, -5, 0, 0, 0], rightEffect: [-5, 0, 0, 0, 5] },
+        { requirePhase2: true, text: "“대낮인데도 햇빛이 핏빛으로 붉게 변했습니다. 백성들이 공포에 떨고 있습니다.”", leftBtn: "하늘을 달래자", rightBtn: "암울한 상황이구나", leftEffect: [0, 0, 0, -10, 10], rightEffect: [-5, 0, 0, 0, -5] },
+        { requirePhase2: true, text: "“법왕사의 불상 머리가 저절로 떨어졌다고 합니다!”", leftBtn: "이자겸의 악행 탓이다!", rightBtn: "즉시 복구하라", leftEffect: [10, -10, 0, 0, 0], rightEffect: [0, 0, 0, -10, 5] },
+        { requirePhase2: true, text: "“정국이 혼란스러우니 올해 과거 시험(과거)을 중지하라는 압박이 들어왔습니다.”", leftBtn: "이자겸의 뜻대로 하라", rightBtn: "인재 등용은 멈출 수 없다", leftEffect: [-10, 10, 0, 0, -5], rightEffect: [5, -10, 0, -5, 5] },
+        { requirePhase2: true, text: "“이자겸과 척준경이 입을 모아 '금나라를 임금의 나라로 섬겨야 한다(사대)'고 주장합니다.”", leftBtn: "현실을 받아들이자...", rightBtn: "오랑캐에게 무릎 꿇을 순 없다!", leftEffect: [-15, 10, 5, 0, -10], rightEffect: [10, -15, -10, 0, 10] },
+        { requirePhase2: true, text: "“이자겸이 자신들을 공신으로 봉하고, 감옥의 사형수들을 풀어주어 은혜를 베풀자고 합니다.”", leftBtn: "원하는 대로 해라...", rightBtn: "반역자들에게 상이라니!", leftEffect: [-20, 20, 0, 0, -10], rightEffect: [10, -20, 0, 0, 5] },
+        { requirePhase2: true, text: "“금나라가 우리의 칭신(사대)을 받아들여 답신을 보냈습니다. 우리를 '신하'라 부르며 거만하게 굴고 있습니다.”", leftBtn: "불가피한 일이다", rightBtn: "답신을 찢어버려라!", leftEffect: [-15, 5, 0, 0, -5], rightEffect: [15, -10, -10, 0, 10] },
+        { requirePhase2: true, text: "“이자겸과 척준경의 노비들이 길을 비키지 않았다며 궁궐 한복판에서 패싸움을 벌였습니다.”", leftBtn: "이자겸의 체면을 세워준다", rightBtn: "척준경의 편을 든다", leftEffect: [-5, 10, -10, 0, 0], rightEffect: [0, -10, 10, 0, 0] },
+        { requirePhase2: true, text: "“궁궐이 불탄 것에 대해 민심이 흉흉합니다. 이자겸이 슬쩍 '무식한 군인들의 방화 탓'이라며 책임을 돌립니다.”", leftBtn: "맞장구친다 (척준경 비난)", rightBtn: "무장들을 감싼다 (이자겸 무시)", leftEffect: [-5, 5, -15, 0, -5], rightEffect: [5, -5, 15, 0, 0] },
+        { requirePhase2: true, text: "“이자겸이 척준경을 견제하여 그의 병권을 회수하려 합니다.”", leftBtn: "승인한다", rightBtn: "그건 부당하다고 막는다", leftEffect: [-5, 15, -15, 0, 0], rightEffect: [5, -10, 10, 0, 0] },
+        { requirePhase2: true, text: "“심복 최사전이 은밀히 아룁니다. '척준경은 의리가 있는 자이니, 진심으로 설득하면 이자겸을 벨 칼이 될 것입니다.'”", leftBtn: "친필 서신을 보낸다", rightBtn: "아직은 위험하다...", leftEffect: [10, -20, 15, 0, 5], rightEffect: [-5, 5, 0, 0, 0] }
+        ];
 
     window.onload = function() { 
-        showIntroText(); // 로딩 시 첫 텍스트 표시
+        showIntroText(); 
         renderStats(); 
         pickNewCard(); 
     };
@@ -493,11 +553,14 @@
         stats = { royal: 50, kin: 50, military: 50, money: 50, public: 50 };
         turn = 1; isPhase2 = false; phase2StartTurn = 0;
         
+        cheokRandomTurn = Math.floor(Math.random() * 31) + 10; 
+
         randomDeck.forEach(c => c.hasPlayed = false);
 
         document.body.classList.remove("phase-fire");
         document.getElementById("game-over-screen").style.display="none";
-        document.getElementById("intro-screen").style.display="none"; // 바로 게임 시작
+        document.getElementById("ending-msg-screen").style.display="none"; 
+        document.getElementById("intro-screen").style.display="none"; 
         document.getElementById("game-container").style.opacity=1;
         document.querySelector(".history-paper").classList.remove("open-effect");
 
@@ -508,10 +571,14 @@
         if (isPhase2) document.body.classList.add("phase-fire");
         else document.body.classList.remove("phase-fire");
 
-        if (nextEventCard) {
+        if (turn === 60) {
+            currentCard = event_persuade_cheok;
+        }
+        else if (nextEventCard) {
             currentCard = nextEventCard;
             nextEventCard = null;
-        } else {
+        } 
+        else {
             const sCard = storyDeck.find(c => c.id === turn);
             if (sCard) {
                 if (sCard.id === 51 && isPhase2) {
@@ -519,7 +586,11 @@
                 } else {
                     currentCard = sCard;
                 }
-            } else {
+            } 
+            else if (turn === cheokRandomTurn && !isPhase2) {
+                currentCard = event_cheok_rumor;
+            }
+            else {
                 pickRandomCard();
             }
         }
@@ -572,19 +643,17 @@
     function updateUI() {
         document.getElementById("question-text").innerHTML = currentCard.text;
 
-	if (isPhase2) {
+        if (isPhase2) {
             document.getElementById("label-royal").innerText = "인종";
             document.getElementById("label-kin").innerText = "이자겸";
             document.getElementById("label-military").innerText = "척준경";
         } else {
-            // 1페이즈거나 리셋되었을 때 원상복구
             document.getElementById("label-royal").innerText = "왕권";
             document.getElementById("label-kin").innerText = "외척";
             document.getElementById("label-military").innerText = "군사";
         }
 
         let dateString = "";
-        
         if (!isPhase2) {
             let y = Math.floor((turn-1)/12)+1; 
             let m = (turn-1)%12+1;
@@ -593,16 +662,13 @@
             let weeksPassed = (turn - phase2StartTurn) + 1;
             let startTotalMonths = phase2StartTurn - 1; 
             let addedMonths = Math.floor((turn - phase2StartTurn) / 4); 
-            
             let currentTotalMonths = startTotalMonths + addedMonths;
-            
             let y = Math.floor(currentTotalMonths / 12) + 1;
             let m = (currentTotalMonths % 12) + 1;
             dateString = `(인종 ${y}년 ${m}월 - 거사 ${weeksPassed}주차)`;
         }
 
         document.getElementById("year-text").innerText = dateString;
-        
         const c = document.getElementById("game-card"); c.style.transform = "translate(0,0) rotate(0)";
         document.getElementById("choice-overlay").style.opacity=0; hidePreview();
     }
@@ -646,7 +712,39 @@
 
         if (currentCard.isPoison && ch === 0) {
             unlockAchievement("die_poison");
-            checkGameOver(true, "독살", "떡에 든 맹독이 퍼져 손쓸 새도 없이 승하하셨습니다.");
+            checkGameOver(true, "독살", "가장 가까운 곳에서 비수를 맞았으니, 권력 앞에서는 혈육의 정도 무색하다.");
+            return;
+        }
+        if (currentCard.isHunting && ch === 0) {
+            if (Math.random() < 0.25) { 
+                unlockAchievement("die_fall");
+                checkGameOver(true, "낙마", "말이 갑자기 날뛰는 바람에 떨어져 목이 부러지고 말았습니다. 허무한 죽음입니다.");
+                return;
+            }
+        }
+        
+        // 척준경 회유 성공
+        if (currentCard.id === "persuade_cheok") {
+            if (ch === 0) { 
+                // [승리 조건] 군사 70, 왕권 50, 외척 40
+                if (stats.military >= 70 && stats.royal >= 50 && stats.kin <= 40) {
+                    document.getElementById("end-title-msg").style.color="#f1c40f"; 
+                    unlockAchievement("win_balance");
+                    checkGameOver(true, "군주", "척준경이 왕명을 받들어 이자겸을 체포하고 유배 보냈습니다. 강력한 왕권과 무력으로 난세를 평정했습니다!");
+                    return;
+                } else {
+                    nextEventCard = event_persuade_fail;
+                    renderStats(); 
+                    pickNewCard(); 
+                    return; 
+                }
+            }
+        }
+
+        // 회유 실패
+        if (currentCard.id === "persuade_fail") {
+            turn = 61; 
+            checkGameOver(); 
             return;
         }
 
@@ -660,60 +758,87 @@
         let eff = (ch===0)?currentCard.leftEffect : (ch===1)?currentCard.rightEffect : (currentCard.downEffect||[0,0,0,0,0]);
         stats.royal += eff[0]||0; stats.kin += eff[1]||0; stats.military += eff[2]||0;
         stats.money += eff[3]||0; stats.public += eff[4]||0;
-	if (stats.money >= 100) unlockAchievement("max_money");
+        
+        if (stats.money >= 100) unlockAchievement("max_money");
         if (stats.public >= 100) unlockAchievement("max_public");
         
         let hasNextEvent = false;
+        if (ch === 0 && currentCard.leftNext) { nextEventCard = currentCard.leftNext; hasNextEvent = true; }
+        else if (ch === 1 && currentCard.rightNext) { nextEventCard = currentCard.rightNext; hasNextEvent = true; }
+        else if (ch === 2 && currentCard.downNext) { nextEventCard = currentCard.downNext; hasNextEvent = true; }
 
-        if (ch === 0 && currentCard.leftNext) {
-            nextEventCard = currentCard.leftNext;
-            hasNextEvent = true;
-        } else if (ch === 1 && currentCard.rightNext) {
-            nextEventCard = currentCard.rightNext;
-            hasNextEvent = true;
-        } else if (ch === 2 && currentCard.downNext) {
-            nextEventCard = currentCard.downNext;
+        if (!hasNextEvent && isPhase2 && turn < 60 && stats.military >= 80 && stats.royal >= 70 && stats.kin <= 30) {
+            nextEventCard = event_persuade_cheok; 
             hasNextEvent = true;
         }
 
-        if (turn === 50) unlockAchievement("turn_50");
-        if (turn === 100) unlockAchievement("turn_100");
+        if (turn === 30) unlockAchievement("turn_50");
+        if (turn === 60) unlockAchievement("turn_100");
 
         renderStats(); 
 
         if(!checkGameOver()) { 
-            if (!hasNextEvent) {
-                turn++; 
-            }
+            if (!hasNextEvent) turn++; 
             pickNewCard(); 
         }
     }
 
+    // [1단계] 엔딩 메시지 표시 함수
     function checkGameOver(force=false, fTitle="", fMsg="") {
         let t="패배", m="", over=false;
         
         if (force) { t=fTitle; m=fMsg; over=true; }
         else if(stats.royal<=0){ t="폐위"; m="왕위의 기둥이 무너지고, 결국 신하들에 의해 폐위되었습니다."; unlockAchievement("die_royal"); over=true; }
+        else if(stats.royal>=100){ t="폭군"; m="왕권이 하늘을 찔러 신하와 백정을 함부로 죽이니, 결국 공포에 질린 이들이 반정을 일으켰습니다."; unlockAchievement("die_tyrant"); over=true; }
         else if(stats.kin<=0){ t="독살"; m="지나친 견제에 위기감을 느낀 외척에게 독살당했습니다."; unlockAchievement("die_poison"); over=true; }
         else if(stats.kin>=100){ t="꼭두각시"; m="외척의 손아귀에 조정이 넘어가고, 허수아비 임금이 되었습니다."; unlockAchievement("die_kin"); over=true; }
         else if(stats.military<=0){ t="함락"; m="군세가 흩어지자 북방이 무너지고, 고려가 오랑캐의 발 아래에 짓밟힙니다."; unlockAchievement("die_military"); over=true; }
         else if(stats.military>=100){ t="정변"; m="비대해진 군부가 왕을 몰아내고 무신정권을 수립했습니다."; unlockAchievement("die_military"); over=true; }
         else if(stats.money<=0){ t="파산"; m="재정이 바닥나 백성들의 시름만 더욱 깊어질 뿐입니다."; unlockAchievement("die_money"); over=true; }
         else if(stats.public<=0){ t="민란"; m="성난 백성들이 궁으로 쳐들어왔습니다."; unlockAchievement("die_public"); over=true; }
-        else if(stats.military>=80 && stats.royal>=70 && stats.kin<=30){ t="군주"; m="이자겸을 몰아내고 고려의 주권을 되찾았습니다!"; document.getElementById("end-title").style.color="#f1c40f"; unlockAchievement("win_balance"); over=true; }
+        else if(isPhase2 && stats.royal >= 80 && stats.public >= 80) {
+            t="명군"; 
+            m="왕의 위엄이 드높고 백성의 지지가 하늘에 닿으니, 이자겸과 척준경도 감히 대항하지 못하고 물러났습니다. 고려에 진정한 평화가 찾아왔습니다!"; 
+            document.getElementById("end-title-msg").style.color="#f1c40f"; // 승리 색상
+            unlockAchievement("win_true"); 
+            over=true; 
+        }
+        else if (turn >= 60) {
+            over = true;
+            unlockAchievement("turn_100");
+            if (stats.kin >= 60) {
+                t = "그림자 왕";
+                m = "평생을 이자겸의 그늘에서 벗어나지 못했습니다. 당신은 왕이었으나, 진정한 주인이었던 적은 없었습니다.";
+            } else if (stats.military >= 60) {
+                t = "무신정권";
+                m = "이자겸은 견제했으나, 그 빈자리를 척준경과 무신들이 차지했습니다. 왕명보다 장군의 칼끝이 더 무서운 세상이 되었습니다.";
+            } else {
+                t = "미완의 개혁";
+                m = "너무 오랜 시간 망설였습니다. 이자겸을 몰아낼 결정적인 기회를 놓치고, 어정쩡한 상태로 치세가 저물었습니다.";
+            }
+        }
 
         if(over) {
-            generateHistory(t, m);
-            const screen = document.getElementById("game-over-screen");
+            // [NEW] 1단계: 메시지 오버레이 표시
+            document.getElementById("end-title-msg").innerText = t;
+            document.getElementById("end-reason-msg").innerText = m;
             document.getElementById("game-container").style.opacity = 0; 
-            screen.style.display = "flex";
+            document.getElementById("ending-msg-screen").style.display = "flex";
             
-            setTimeout(() => {
-                document.querySelector(".history-paper").classList.add("open-effect");
-            }, 50);
+            // 데이터는 미리 만들어두지만 화면은 아직 안 보여줌
+            generateHistory(t, m);
             return true;
         }
         return false;
+    }
+
+    // [2단계] 사료 엔딩 화면으로 전환 (터치 시 호출)
+    function showHistoryScroll() {
+        document.getElementById("ending-msg-screen").style.display = "none";
+        document.getElementById("game-over-screen").style.display = "flex";
+        setTimeout(() => {
+            document.querySelector(".history-paper").classList.add("open-effect");
+        }, 50);
     }
 
     function generateHistory(title, reason) {
@@ -726,19 +851,39 @@
         let records = [];
         if (turn > 12) records.push(`즉위 초, 이자겸의 위세 속에서도 ${years}년 넘게 버티었다.`);
         if (isPhase2) records.push("이자겸의 전횡에 맞서 거사를 도모하였다.");
-        if (phase2StartTurn > 0 && turn - phase2StartTurn > 4) records.push("거사 실패 후에도 끈질기게 저항하며 기회를 엿보았다.");
+        if (phase2StartTurn > 0 && turn - phase2StartTurn > 4 && title !== "명군" && title !== "군주") {
+            records.push("거사 실패 후 내전의 혼란 속에서도 끈질기게 저항하며 기회를 엿보았다.");
+        }
+
+        if (stats.money >= 100) records.push("내탕금과 국고가 가득 차, 고려 역사상 가장 부유한 시기를 열었다.");
+        else if (stats.money > 70) records.push("국고를 넉넉히 하여 나라의 살림을 윤택하게 했다.");
         
-        if (stats.money > 80) records.push("국고를 가득 채워 나라의 살림을 윤택하게 했다.");
-        if (stats.public > 80) records.push("백성들의 목소리에 귀를 기울여 성군의 자질을 보였다.");
-        if (stats.military > 80) records.push("군사력을 강하게 키워 북방을 경계했다.");
+        if (stats.public >= 100) records.push("지극한 선정을 베풀어, 백성들이 왕을 어버이처럼 따르며 노래했다.");
+        else if (stats.public > 70) records.push("백성들의 목소리에 귀를 기울여 성군의 자질을 보였다.");
         
+        if (stats.military > 80) records.push("군사력을 강하게 키워 북방의 위협과 내란에 대비했다.");
+        if (stats.royal >= 100) records.push("왕권이 하늘을 찔러, 왕의 말 한마디에 산천이 떨었다.");
+
+        if (title === "명군") records.push("피를 흘리지 않는 위엄으로 역적들을 굴복시키고 왕실의 권위를 드높였다.");
+        if (title === "낙마") records.push("사냥을 즐기다 불의의 사고를 당해, 뜻을 다 펼치지 못하고 요절하였다.");
+        if (title === "독살") records.push("이자겸의 압박 앞에서 수상한 떡을 먹고 요절하였다.");
+        if (title === "그림자 왕" || title === "미완의 개혁") records.push("오랜 기간 재위하였으나, 끝내 이자겸의 그늘을 완전히 걷어내지 못했다.");
+        if (title === "무신정권") records.push("외척을 견제하기 위해 키운 군사력이 도리어 왕권을 옥죄는 족쇄가 되었다.");
+
         let evaluation = "";
         switch(title) {
-            case "군주": evaluation = "왕은 지혜롭고 용맹하여 외척의 발호를 누르고 왕실의 위엄을 되찾았다. "; break;
-            case "독살": case "폐위": evaluation = "왕은 뜻을 펴보려 했으나, 시대의 흐름과 외척의 횡포를 이겨내지 못했다."; break;
-            case "허수아비": evaluation = "왕좌에 있었으나 왕은 아니었다. 권력은 신하에게 있었으니, 이를 어찌 왕이라 하겠는가."; break;
-            case "정변": case "함락": evaluation = "무력을 통제하지 못해 스스로 화를 불렀다. 칼로 흥한 자, 칼로 망하는 법."; break;
-            case "파산": case "민란": evaluation = "백성의 삶을 돌보지 않고 근본을 잃었으니, 천명(天命)이 떠난 것은 당연한 이치."; break;
+            case "명군": evaluation = "성군의 덕과 제왕의 위엄을 동시에 갖추었으니, 만세의 귀감이 될 것이다."; break;
+            case "군주": evaluation = "난세를 평정하고 왕실을 지켜냈으나, 그 과정에서 흐른 피가 너무 많았다."; break;
+            case "폭군": evaluation = "군주가 덕을 잃고 공포로만 다스리려 했으니, 그 끝이 비참한 것은 자명한 이치다."; break;
+            case "낙마": evaluation = "한 나라의 군주가 유희를 좇다 허망하게 지다니."; break;
+            case "독살": evaluation = "가장 가까운 곳에서 비수를 맞았으니, 권력 앞에서는 혈육의 정도 무색하다."; break;
+            case "폐위": evaluation = "외척의 그늘에 가려 뜻을 펴보지 못하고 꺾였으니, 슬픈 일이다."; break;
+            case "허수아비": evaluation = "왕좌에 있었으나 왕이 아니었다. 권력은 신하에게 있었고 왕은 허울뿐이었으니, 이를 어찌 군주라 하겠는가."; break;
+            case "정변": case "함락": evaluation = "무력을 통제하지 못해 스스로 화를 불렀다. 칼로 흥한 자는 결국 칼로 망하는 법."; break;
+            case "파산": case "민란": evaluation = "백성의 삶을 돌보지 않고 근본을 잃었으니, 민심이 떠나고 천명(天命)이 다한 것은 당연한 귀결."; break;
+            case "그림자 왕": evaluation = "보위에는 오래 있었으나 실권은 신하에게 있었다. 후세는 그를 끈기 있는 자라 칭하기보단, 결단력 없는 유약한 군주로 기억할 것이다."; break;
+            case "무신정권": evaluation = "여우를 피하려다 호랑이를 불러들였다. 문신을 누르고 득세한 무신들이 조정을 장악하니, 고려는 긴 무신정권의 어둠 속으로 들어갔다."; break;
+            case "미완의 개혁": evaluation = "과감하게 칼을 뽑아야 할 때 뽑지 못했다. 안정을 핑계로 현실에 안주했으니, 역사의 물줄기를 바꾸지 못한 회한만이 남았다."; break;
             default: evaluation = "왕의 치세는 짧고 덧없었다. 역사는 그를 비운의 군주로 기억할 것이다.";
         }
 
@@ -757,7 +902,7 @@
                     ${records.length > 0 ? records.map(r => `<li>${r}</li>`).join('') : "<li>특별히 기록할 만한 일이 없다.</li>"}
                 </ul>
             </div>
-            <div class="history-section" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:20px;">
+            <div class="history-section" style="border-top:1px dashed #795548; padding-top:10px; margin-top:20px;">
                 <span class="history-label">▣ 사관의 평:</span><br>
                 <span class="history-text" style="font-style: italic;">"${evaluation}"</span>
             </div>
@@ -768,30 +913,77 @@
     function initSwipe() {
         const card=document.getElementById("game-card"), ov=document.getElementById("choice-overlay");
         if(card.getAttribute("d-s")==="1")return; card.setAttribute("d-s","1");
+        
         let sX=0, sY=0, isD=false; let cX=0, cY=0; 
+        
         const start=(x,y)=>{ sX=x; sY=y; isD=true; card.style.transition="none"; };
+        
         const move=(x,y)=>{
             if(!isD)return;
             cX=x-sX; cY=y-sY;
+            
             if(Math.abs(cY)>Math.abs(cX) && cY>0) { 
                 card.style.transform=`translate(0,${cY}px)`;
-                ov.style.opacity=Math.min(cY/100,1); ov.innerText=currentCard.downBtn||"...(침묵한다)"; ov.style.color="#95a5a6";
+                ov.style.opacity=Math.min(cY/100,1); 
+                ov.innerText=currentCard.downBtn||"...(침묵한다)"; 
+                ov.style.color="#95a5a6";
+                ov.classList.remove("locked"); 
                 showPreview(2);
-            } else { 
+            } 
+            else { 
                 card.style.transform=`translate(${cX}px,${cY*0.2}px) rotate(${cX*0.05}deg)`;
                 ov.style.opacity=Math.min(Math.abs(cX)/100,1);
-                if(cX<0){ ov.innerText=currentCard.leftBtn; ov.style.color="#e74c3c"; showPreview(0); }
-                else{ ov.innerText=currentCard.rightBtn; ov.style.color="#27ae60"; showPreview(1); }
+                
+                if(cX<0){ 
+                    if (isPhase2 && stats.royal < 30) {
+                        ov.innerText = "⛔ 왕권 부족";
+                        ov.classList.add("locked"); 
+                    } else {
+                        ov.innerText = currentCard.leftBtn;
+                        ov.style.color = "#e74c3c";
+                        ov.classList.remove("locked");
+                    }
+                    showPreview(0); 
+                }
+                else{ 
+                    ov.innerText=currentCard.rightBtn; 
+                    ov.style.color="#27ae60"; 
+                    ov.classList.remove("locked");
+                    showPreview(1); 
+                }
             }
         };
+
         const end=()=>{
             if(!isD)return; isD=false; card.style.transition="transform 0.3s";
-            if(cY>100 && Math.abs(cY)>Math.abs(cX)){ card.style.transform=`translate(0,1000px)`; setTimeout(()=>makeChoice(2),200); }
-            else if(cX>100){ card.style.transform=`translate(1000px,0) rotate(30deg)`; setTimeout(()=>makeChoice(1),200); }
-            else if(cX<-100){ card.style.transform=`translate(-1000px,0) rotate(-30deg)`; setTimeout(()=>makeChoice(0),200); }
-            else { card.style.transform="translate(0,0) rotate(0)"; ov.style.opacity=0; hidePreview(); }
+            
+            if(cY>100 && Math.abs(cY)>Math.abs(cX)){ 
+                card.style.transform=`translate(0,1000px)`; 
+                setTimeout(()=>makeChoice(2),200); 
+            }
+            else if(cX>100){ 
+                card.style.transform=`translate(1000px,0) rotate(30deg)`; 
+                setTimeout(()=>makeChoice(1),200); 
+            }
+            else if(cX<-100){ 
+                if (isPhase2 && stats.royal < 30) {
+                    card.style.transform="translate(0,0) rotate(0)"; 
+                    ov.style.opacity=0; 
+                    hidePreview();
+                    showToast("⛔ 스탯이 부족해 선택할 수 없습니다! (왕권 30 필요)");
+                } else {
+                    card.style.transform=`translate(-1000px,0) rotate(-30deg)`; 
+                    setTimeout(()=>makeChoice(0),200); 
+                }
+            }
+            else { 
+                card.style.transform="translate(0,0) rotate(0)"; 
+                ov.style.opacity=0; 
+                hidePreview(); 
+            }
             cX=0; cY=0;
         };
+
         card.addEventListener("touchstart",e=>start(e.touches[0].clientX,e.touches[0].clientY),{passive:false});
         card.addEventListener("mousedown",e=>start(e.clientX,e.clientY));
         window.addEventListener("touchmove",e=>{if(isD){e.preventDefault();move(e.touches[0].clientX,e.touches[0].clientY);}},{passive:false});
@@ -801,4 +993,3 @@
     </script>
 </body>
 </html>
-
