@@ -340,7 +340,8 @@
         { id: "max_public", icon: "🙏", title: "성군", desc: "민심이 하늘을 찌르니 실로 만백성의 어버이라 할만하다." },
         { id: "die_tyrant", icon: "🩸", title: "폭군", desc: "왕권이 폭주하여 공포 정치를 펼치다 쫓겨나다." },
         { id: "die_fall", icon: "🐴", title: "낙마", desc: "사냥 중 불의의 사고로 생을 마감하다." },
-        { id: "win_true", icon: "☀️", title: "명군", desc: "압도적인 왕권과 민심으로 외척과 군부를 제압하고 평화를 되찾다." }
+        { id: "win_true", icon: "☀️", title: "명군", desc: "압도적인 왕권과 민심으로 외척과 군부를 제압하고 평화를 되찾다." },
+	{ id: "die_silence", icon: "😶", title: "침묵의 왕", desc: "결정을 내리지 않고 침묵만 지키다 신하들에게 버림받다." }
     ];
 
     function getUnlockedData() {
@@ -425,6 +426,7 @@
     let isPhase2 = false;
     let phase2StartTurn = 0;
     let cheokRandomTurn = 0; // 척준경 불만 이벤트 랜덤 턴
+    let silenceStreak = 0;
 
     // [데이터 1] 연계 이벤트
     const event_fire_loot = { text: "“불이 서적과 보물이 가득한 전각으로 번지고 있습니다!”", leftBtn: "왕실 서적을 옮겨라", rightBtn: "보물을 챙겨라", leftEffect: [0, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 20, -10], requirePhase2: true };
@@ -552,6 +554,7 @@
     function resetGame() {
         stats = { royal: 50, kin: 50, military: 50, money: 50, public: 50 };
         turn = 1; isPhase2 = false; phase2StartTurn = 0;
+	silenceStreak = 0;
         
         cheokRandomTurn = Math.floor(Math.random() * 31) + 10; 
 
@@ -709,6 +712,17 @@
     function makeChoice(ch) {
         document.getElementById("warning-overlay").style.display = "none";
         document.getElementById("game-container").classList.remove("shake-effect");
+	if (ch === 2) { // 2는 아래쪽(침묵) 선택
+            silenceStreak++;
+        } else { // 왼쪽(0)이나 오른쪽(1)을 고르면 연속 기록 끊김
+            silenceStreak = 0;
+        }
+
+        if (silenceStreak >= 3) {
+            unlockAchievement("die_silence");
+            checkGameOver(true, "침묵의 왕", "국정에 관여하지 않고 연거푸 침묵하니, 답답함을 느낀 신료들이 전하를 내쫓고 새 왕을 추대했습니다.");
+            return;
+        }
 
         if (currentCard.isPoison && ch === 0) {
             unlockAchievement("die_poison");
@@ -869,6 +883,7 @@
         if (title === "독살") records.push("이자겸의 압박 앞에서 수상한 떡을 먹고 요절하였다.");
         if (title === "그림자 왕" || title === "미완의 개혁") records.push("오랜 기간 재위하였으나, 끝내 이자겸의 그늘을 완전히 걷어내지 못했다.");
         if (title === "무신정권") records.push("외척을 견제하기 위해 키운 군사력이 도리어 왕권을 옥죄는 족쇄가 되었다.");
+	if (title === "침묵의 왕") records.push("중대한 국면마다 입을 닫고 결정을 회피하여 조정의 혼란을 가중시켰다.");
 
         let evaluation = "";
         switch(title) {
@@ -884,6 +899,9 @@
             case "그림자 왕": evaluation = "보위에는 오래 있었으나 실권은 신하에게 있었다. 후세는 그를 끈기 있는 자라 칭하기보단, 결단력 없는 유약한 군주로 기억할 것이다."; break;
             case "무신정권": evaluation = "여우를 피하려다 호랑이를 불러들였다. 문신을 누르고 득세한 무신들이 조정을 장악하니, 고려는 긴 무신정권의 어둠 속으로 들어갔다."; break;
             case "미완의 개혁": evaluation = "과감하게 칼을 뽑아야 할 때 뽑지 못했다. 안정을 핑계로 현실에 안주했으니, 역사의 물줄기를 바꾸지 못한 회한만이 남았다."; break;
+	    case "침묵의 왕": 
+                evaluation = "소통하지 않고 책임지지 않는 왕은 고립될 수 밖에 없다."; 
+                break;
             default: evaluation = "왕의 치세는 짧고 덧없었다. 역사는 그를 비운의 군주로 기억할 것이다.";
         }
 
@@ -993,6 +1011,5 @@
     </script>
 </body>
 </html>
-
 
 
