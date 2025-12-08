@@ -457,7 +457,7 @@
         leftEffect: [-5, 0, 10, 0, 0], rightEffect: [5, 0, -10, 0, 0]
     };
 
-    // [데이터 2] 스토리 덱
+    // [데이터 2] 고정 스토리 덱
     const storyDeck = [
         { id: 1, text: "“전하의 즉위에 이자겸 대감이 손을 쓴 것으로 보입니다.”", leftBtn: "감사를 표하라", rightBtn: "그게 무슨 상관이지?", leftEffect: [-10, 10, 0, 0, 0], rightEffect: [10, -10, 0, 0, 0], downBtn: "침묵한다", downEffect: [0, 0, 0, 0, 0] },
         { id: 45, text: "“영통사 북쪽에서 까마귀 떼가 시끄럽게 울며 서로 싸우고 있습니다. 흉조가 분명합니다.”", leftBtn: "제사를 지내 액운을 막아라", rightBtn: "미물들의 다툼일 뿐이다", leftEffect: [0, 0, 0, -10, 10], rightEffect: [5, 0, 0, 0, -10] }, 
@@ -718,7 +718,7 @@
         if (currentCard.isHunting && ch === 0) {
             if (Math.random() < 0.25) { 
                 unlockAchievement("die_fall");
-                checkGameOver(true, "낙마", "말이 갑자기 날뛰는 바람에 떨어져 목이 부러지고 말았습니다. 허무한 죽음입니다.");
+                checkGameOver(true, "낙마", "말이 갑자기 날뛰는 바람에 떨어져 목이 부러지고 말았습니다. 불운한 죽음입니다.");
                 return;
             }
         }
@@ -993,3 +993,4 @@
     </script>
 </body>
 </html>
+
