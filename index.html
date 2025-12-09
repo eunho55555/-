@@ -221,18 +221,16 @@
         }
         .card:active { cursor: grabbing; }
 
-        /* [수정] 선택지 텍스트: 훨씬 크고 잘 보이게 */
-        /* [수정] 선택지 텍스트: 카드 상단 여백으로 이동 (겹침 방지) */
         .choice-overlay {
             position: absolute; 
-            top: 40px; /* [중요] 중앙(50%)이 아니라 위쪽으로 올림 */
+            top: 40px; /* 상단 배치 */
             left: 0; 
             width: 100%; 
             padding: 0 10px; 
             box-sizing: border-box;
             
             text-align: center; 
-            font-size: 30px; /* 크기도 다시 살짝 키워도 됨 */
+            font-size: 30px; 
             font-weight: 900; 
             line-height: 1.2;
             
@@ -241,20 +239,18 @@
             pointer-events: none;
             z-index: 20;
             
-            /* 글자 테두리 */
-            text-shadow: 
-                -2px -2px 0 #fdfbf7, 2px -2px 0 #fdfbf7, 
-                -2px 2px 0 #fdfbf7, 2px 2px 0 #fdfbf7,
-                0 0 8px rgba(0,0,0,0.3); 
+            /* [변경] 하얀 테두리 삭제 -> 은은한 그림자로 대체 */
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
             
             word-break: keep-all;
         }
 
         /* 잠김 상태 */
         .choice-overlay.locked {
-            color: #95a5a6 !important; 
+            color: #7f8c8d !important; /* 더 진한 회색 */
             text-decoration: line-through;
-            text-shadow: -1px -1px 0 #fff, 1px 1px 0 #fff;
+            text-shadow: none; /* 잠김 상태는 그림자 없음 */
+            opacity: 0.8;
         }
 
         /* 카드 내부 텍스트 (질문) */
@@ -979,13 +975,13 @@
         else if (ch === 1 && currentCard.rightNext) { nextEventCard = currentCard.rightNext; hasNextEvent = true; }
         else if (ch === 2 && currentCard.downNext) { nextEventCard = currentCard.downNext; hasNextEvent = true; }
 
-        if (!hasNextEvent && isPhase2 && turn < 60 && stats.military >= 80 && stats.royal >= 70 && stats.kin <= 30) {
+        if (!hasNextEvent && isPhase2 && turn < 60 && stats.military >= 50 && stats.royal >= 50 && stats.kin <= 40) {
             nextEventCard = event_persuade_cheok; 
             hasNextEvent = true;
         }
 
-        if (turn === 30) unlockAchievement("turn_50");
-        if (turn === 60) unlockAchievement("turn_100");
+        if (turn >= 30) unlockAchievement("turn_50");
+        if (turn >= 60) unlockAchievement("turn_100");
 
         renderStats(); 
 
