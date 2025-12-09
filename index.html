@@ -690,24 +690,38 @@
     function renderStats() {
         const topVals = [stats.royal, stats.kin, stats.military];
         const topIds = ["fill-royal", "fill-kin", "fill-military"];
+        
         for(let i=0; i<3; i++) {
+            // 0~100 사이로 값 제한 (UI 표시용)
             const h = Math.max(0, Math.min(100, topVals[i]));
             const el = document.getElementById(topIds[i]);
+            
             el.style.height = h + "%";
-            if(h <= 20) el.style.backgroundColor = "#e74c3c";
-            else if(h >= 100) el.style.backgroundColor = "#f1c40f"; 
-            else el.style.backgroundColor = "#ecf0f1";
+        if(h <= 20 || h >= 80) {
+                el.style.backgroundColor = "#e74c3c"; // 🔴 위험!
+            } else {
+                el.style.backgroundColor = "#ecf0f1"; // ⚪ 안전
+            }
         }
+
         const botVals = [stats.money, stats.public];
         const botFillIds = ["fill-money", "fill-public"];
         const botTextIds = ["text-money", "text-public"];
+        
         for(let i=0; i<2; i++) {
             const v = Math.max(0, Math.min(100, botVals[i]));
             document.getElementById(botFillIds[i]).style.width = v + "%";
             document.getElementById(botTextIds[i]).innerText = v;
+            
             const fillEl = document.getElementById(botFillIds[i]);
-            if(v <= 20) fillEl.style.backgroundColor = "#e74c3c";
-            else fillEl.style.backgroundColor = "#f1c40f";
+            
+            if(v <= 20) {
+                fillEl.style.backgroundColor = "#e74c3c"; // 🔴 위험!
+            } else if (v >= 100) {
+                fillEl.style.backgroundColor = "#f1c40f"; // 🟡 만땅 (좋음)
+            } else {
+                fillEl.style.backgroundColor = "#f1c40f"; // 기본 노란색 유지
+            }
         }
     }
 
