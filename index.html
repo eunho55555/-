@@ -765,8 +765,8 @@
         // 척준경 회유 성공
         if (currentCard.id === "persuade_cheok") {
             if (ch === 0) { 
-                // [승리 조건] 군사 60, 왕권 50, 외척 40
-                if (stats.military >= 60 && stats.royal >= 50 && stats.kin <= 40) {
+                // [승리 조건] 군사 50, 왕권 50, 외척 40
+                if (stats.military >= 50 && stats.royal >= 50 && stats.kin <= 40) {
                     document.getElementById("end-title-msg").style.color="#f1c40f"; 
                     unlockAchievement("win_balance");
                     checkGameOver(true, "군주", "척준경이 왕명을 받들어 이자겸을 체포하고 유배 보냈습니다. 강력한 왕권과 무력으로 난세를 평정했습니다!");
@@ -1044,6 +1044,7 @@
     </script>
 </body>
 </html>
+
 
 
 
