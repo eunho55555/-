@@ -5,6 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>고려의 왕: 이자겸의 난</title>
     <style>
+        /* 드래그 시 배경 색상 피드백 오버레이 */
+        #background-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; /* 배경(body) 바로 위 */
+            transition: background-color 0.2s ease;
+        }
+	/* 1. 텍스트 발광 효과 */
+        .text-glow {
+            color: #fff700 !important; /* 샛노란색 */
+            text-shadow: 0 0 5px #f1c40f, 0 0 10px #e67e22, 0 0 20px #e74c3c; /* 불타는 듯한 광채 */
+            transform: scale(1.1); /* 글자 살짝 커짐 */
+            transition: all 0.2s;
+        }
+
+        /* 2. 액체 찰랑거림(Slosh) 효과 */
+        .sloshing {
+            animation: sloshWave 0.8s infinite ease-in-out;
+            filter: brightness(1.3); /* 밝아짐 */
+        }
+	.bar-shimmer {
+            animation: shimmerPulse 0.8s infinite alternate;
+        }
+        @keyframes shimmerPulse {
+            0% { filter: brightness(1); box-shadow: 0 0 2px rgba(241, 196, 15, 0.2); }
+            100% { filter: brightness(1.4); box-shadow: 0 0 12px rgba(241, 196, 15, 0.8); }
+        }
+        
+        @keyframes sloshWave {
+            0% { transform: scaleY(1) skewX(0deg); filter: brightness(1); }
+            25% { transform: scaleY(1.1) skewX(-5deg); }
+            50% { transform: scaleY(0.9) skewX(5deg); filter: brightness(1.3); }
+            75% { transform: scaleY(1.05) skewX(-2deg); }
+            100% { transform: scaleY(1) skewX(0deg); filter: brightness(1); }
+        }
+        /* 스탯 애니메이션 및 위치 조정 */
+        .highlight-stat {
+            animation: pulseStat 0.8s infinite alternate;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.8);
+            border-color: #f1c40f !important;
+            z-index: 10;
+        }
+        @keyframes pulseStat {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+        .top-bar .indicator { top: -12px; }
+        .bar-row .indicator { left: -12px; top: 50%; transform: translateY(-50%); }
+
         /* [기본 설정 & 1페이즈 배경] */
         body {
             font-family: 'Nanum Myeongjo', serif;
@@ -27,7 +75,7 @@
             100% { box-shadow: inset 0 0 150px rgba(255, 0, 0, 0.6); }
         }
 
-        /* [레이어 순서 정리] */
+        /* [레이어 순서] */
         .game-container { z-index: 1; }
         .warning-overlay { z-index: 10; }
         .intro-overlay { z-index: 9999; }
@@ -47,8 +95,7 @@
         }
         .intro-text { 
             font-size: 22px; font-weight: bold; line-height: 1.8; margin-bottom: 50px; 
-            opacity: 0; 
-            max-width: 80%; pointer-events: none; 
+            opacity: 0; max-width: 80%; pointer-events: none; 
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); 
         }
         .intro-text.show { animation: fadeIn 1.5s forwards; }
@@ -263,22 +310,20 @@
     
     <div id="warning-overlay" class="warning-overlay"></div>
     
+    <div id="background-overlay"></div>
     <div id="game-container" class="game-container">
         <div class="top-bar">
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-0"></div>
-                <div class="stat-item"><div class="stat-icon">👑</div><div class="stat-fill" id="fill-royal"></div></div>
-                <div class="stat-name" id="label-royal">왕권</div>
+                <div class="stat-item" id="icon-0"><div class="stat-icon">👑</div><div class="stat-fill" id="fill-royal"></div></div> <div class="stat-name" id="label-royal">왕권</div>
             </div>
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-1"></div>
-                <div class="stat-item"><div class="stat-icon">🐍</div><div class="stat-fill" id="fill-kin"></div></div>
-                <div class="stat-name" id="label-kin">외척</div>
+                <div class="stat-item" id="icon-1"><div class="stat-icon">🐍</div><div class="stat-fill" id="fill-kin"></div></div> <div class="stat-name" id="label-kin">외척</div>
             </div>
             <div class="stat-wrapper">
                 <div class="indicator" id="ind-2"></div>
-                <div class="stat-item"><div class="stat-icon">⚔️</div><div class="stat-fill" id="fill-military"></div></div>
-                <div class="stat-name" id="label-military">군사</div>
+                <div class="stat-item" id="icon-2"><div class="stat-icon">⚔️</div><div class="stat-fill" id="fill-military"></div></div> <div class="stat-name" id="label-military">군사</div>
             </div>
         </div>
 
@@ -294,15 +339,13 @@
         <div class="bottom-stats-container">
             <div class="bar-row">
                 <div class="indicator" id="ind-3"></div>
-                <div class="bar-icon">💰</div>
-                <div class="bar-label">국고</div>
+                <div class="bar-icon" id="icon-3">🪙</div> <div class="bar-label">국고</div>
                 <div class="bar-track"><div class="bar-value-fill" id="fill-money"></div></div>
                 <div class="bar-text" id="text-money">50</div>
             </div>
             <div class="bar-row">
                 <div class="indicator" id="ind-4"></div>
-                <div class="bar-icon">🌾</div>
-                <div class="bar-label">민심</div>
+                <div class="bar-icon" id="icon-4">🌾</div> <div class="bar-label">민심</div>
                 <div class="bar-track"><div class="bar-value-fill" id="fill-public"></div></div>
                 <div class="bar-text" id="text-public">50</div>
             </div>
@@ -325,7 +368,9 @@
     </div>
 
     <script>
+    // --------------------------------------------------------------------------------
     // [시스템] 업적 데이터 및 함수 (LocalStorage 사용)
+    // --------------------------------------------------------------------------------
     const achievements = [
         { id: "win_balance", icon: "👑", title: "균형의 왕", desc: "척준경을 회유해 이자겸을 몰아내고 고려의 균형을 되찾다." },
         { id: "die_poison", icon: "💀", title: "비운의 미식가", desc: "수상한 떡을 먹고 생을 마감하다." },
@@ -336,12 +381,12 @@
         { id: "die_public", icon: "🔥", title: "성난 민심", desc: "민란이 일어나 궁궐이 불타다." },
         { id: "turn_50", icon: "⏳", title: "절반의 성공", desc: "2년 반(30턴)을 버티다." },
         { id: "turn_100", icon: "📜", title: "장수왕", desc: "약 4년(60턴) 이상 장기 집권하다." },
-        { id: "max_money", icon: "💰", title: "부국", desc: "국고가 가득 차 넘쳐 부유한 나라를 이루다." },
+        { id: "max_money", icon: "🪙", title: "부국", desc: "국고가 가득 차 넘쳐 부유한 나라를 이루다." },
         { id: "max_public", icon: "🙏", title: "성군", desc: "민심이 하늘을 찌르니 실로 만백성의 어버이라 할만하다." },
         { id: "die_tyrant", icon: "🩸", title: "폭군", desc: "왕권이 폭주하여 공포 정치를 펼치다 쫓겨나다." },
         { id: "die_fall", icon: "🐴", title: "낙마", desc: "사냥 중 불의의 사고로 생을 마감하다." },
         { id: "win_true", icon: "☀️", title: "명군", desc: "압도적인 왕권과 민심으로 외척과 군부를 제압하고 평화를 되찾다." },
-	{ id: "die_silence", icon: "😶", title: "침묵의 왕", desc: "결정을 내리지 않고 침묵만 지키다 신하들에게 버림받다." }
+        { id: "die_silence", icon: "😶", title: "침묵의 왕", desc: "결정을 내리지 않고 침묵만 지키다 신하들에게 버림받다." }
     ];
 
     function getUnlockedData() {
@@ -565,7 +610,6 @@
     function resetGame() {
         stats = { royal: 50, kin: 50, military: 50, money: 50, public: 50 };
         turn = 1; isPhase2 = false; phase2StartTurn = 0;
-	silenceStreak = 0;
         
         cheokRandomTurn = Math.floor(Math.random() * 31) + 10; 
 
@@ -690,56 +734,94 @@
     function renderStats() {
         const topVals = [stats.royal, stats.kin, stats.military];
         const topIds = ["fill-royal", "fill-kin", "fill-military"];
-        
         for(let i=0; i<3; i++) {
-            // 0~100 사이로 값 제한 (UI 표시용)
             const h = Math.max(0, Math.min(100, topVals[i]));
             const el = document.getElementById(topIds[i]);
-            
             el.style.height = h + "%";
-        if(h <= 20 || h >= 70) {
+            if(h <= 20 || h >= 80) {
                 el.style.backgroundColor = "#e74c3c"; // 🔴 위험!
             } else {
                 el.style.backgroundColor = "#ecf0f1"; // ⚪ 안전
             }
         }
-
         const botVals = [stats.money, stats.public];
         const botFillIds = ["fill-money", "fill-public"];
         const botTextIds = ["text-money", "text-public"];
-        
         for(let i=0; i<2; i++) {
             const v = Math.max(0, Math.min(100, botVals[i]));
             document.getElementById(botFillIds[i]).style.width = v + "%";
             document.getElementById(botTextIds[i]).innerText = v;
-            
             const fillEl = document.getElementById(botFillIds[i]);
-            
-            if(v <= 20) {
-                fillEl.style.backgroundColor = "#e74c3c"; // 🔴 위험!
-            } else if (v >= 100) {
-                fillEl.style.backgroundColor = "#f1c40f"; // 🟡 만땅 (좋음)
-            } else {
-                fillEl.style.backgroundColor = "#f1c40f"; // 기본 노란색 유지
-            }
+            if(v <= 20) fillEl.style.backgroundColor = "#e74c3c";
+            else fillEl.style.backgroundColor = "#f1c40f";
         }
+    }
+
+    // ID 매핑 헬퍼 함수 (0~4 인덱스를 실제 HTML ID로 변환)
+    function getStatIds(index) {
+        // 순서: 왕권(0), 외척(1), 군사(2), 국고(3), 민심(4)
+        const fills = ["fill-royal", "fill-kin", "fill-military", "fill-money", "fill-public"];
+        const labels = ["label-royal", "label-kin", "label-military", "text-money", "text-public"];
+        const icons = ["icon-0", "icon-1", "icon-2", "icon-3", "icon-4"];
+        return { 
+            fill: document.getElementById(fills[index]), 
+            label: document.getElementById(labels[index]),
+            icon: document.getElementById(icons[index])
+        };
     }
 
     function showPreview(ch) {
         let eff = (ch===0)?currentCard.leftEffect : (ch===1)?currentCard.rightEffect : (currentCard.downEffect||[0,0,0,0,0]);
+        
         for(let i=0; i<5; i++) {
-            if(eff[i] !== 0) document.getElementById(`ind-${i}`).classList.add("active");
-            else document.getElementById(`ind-${i}`).classList.remove("active");
+            const els = getStatIds(i); // ID 가져오기 헬퍼 
+             if(eff[i] !== 0) {
+                document.getElementById(`ind-${i}`).classList.add("active");
+                if(els.icon) els.icon.classList.add("highlight-stat");
+                if(els.label) els.label.classList.add("text-glow");
+
+                //  상단(0~2)은 출렁임, 하단(3~4)은 빛남 효과 분리
+                if(els.fill) {
+                    if (i < 3) els.fill.classList.add("sloshing"); // 상단
+                    else els.fill.classList.add("bar-shimmer");   // 하단 (NEW)
+                }
+            }
+            else {
+                document.getElementById(`ind-${i}`).classList.remove("active");
+                if(els.icon) els.icon.classList.remove("highlight-stat");
+                if(els.label) els.label.classList.remove("text-glow");
+                if(els.fill) {
+                    els.fill.classList.remove("sloshing");
+                    els.fill.classList.remove("bar-shimmer");
+                }
+            }
         }
     }
-    function hidePreview() { for(let i=0; i<5; i++) document.getElementById(`ind-${i}`).classList.remove("active"); }
+
+    function hidePreview() { 
+        for(let i=0; i<5; i++) {
+            const els = getStatIds(i);
+            
+            document.getElementById(`ind-${i}`).classList.remove("active");
+            
+            if(els.icon) els.icon.classList.remove("highlight-stat");
+            if(els.label) els.label.classList.remove("text-glow");
+            
+            // 두 클래스 모두 제거
+            if(els.fill) {
+                els.fill.classList.remove("sloshing");
+                els.fill.classList.remove("bar-shimmer");
+            }
+        }
+    }
 
     function makeChoice(ch) {
         document.getElementById("warning-overlay").style.display = "none";
         document.getElementById("game-container").classList.remove("shake-effect");
-	if (ch === 2) { // 2는 아래쪽(침묵) 선택
+
+        if (ch === 2) { 
             silenceStreak++;
-        } else { // 왼쪽(0)이나 오른쪽(1)을 고르면 연속 기록 끊김
+        } else { 
             silenceStreak = 0;
         }
 
@@ -800,14 +882,6 @@
         
         if (stats.money >= 100) unlockAchievement("max_money");
         if (stats.public >= 100) unlockAchievement("max_public");
-	if (!isPhase2 && turn < 46) {
-            if (stats.kin >= 80 && stats.military >= 80) {
-                // 이미 게임오버(100)가 아닐 때만 발동
-                if (stats.kin < 100 && stats.military < 100) {
-                    nextEventCard = event_force_phase2;
-                }
-            }
-        }
         
         let hasNextEvent = false;
         if (ch === 0 && currentCard.leftNext) { nextEventCard = currentCard.leftNext; hasNextEvent = true; }
@@ -836,7 +910,7 @@
         
         if (force) { t=fTitle; m=fMsg; over=true; }
         else if(stats.royal<=0){ t="폐위"; m="왕위의 기둥이 무너지고, 결국 신하들에 의해 폐위되었습니다."; unlockAchievement("die_royal"); over=true; }
-        else if(stats.royal>=100){ t="폭군"; m="왕권이 하늘을 찔러 신하와 백정을 함부로 죽이니, 결국 공포에 질린 이들이 반정을 일으켰습니다."; unlockAchievement("die_tyrant"); over=true; }
+        else if(stats.royal>=100){ t="폭군"; m="왕권이 하늘을 찔러 신하들을 함부로 죽이니, 결국 공포에 질린 이들이 반정을 일으켰습니다."; unlockAchievement("die_tyrant"); over=true; }
         else if(stats.kin<=0){ t="독살"; m="지나친 견제에 위기감을 느낀 외척에게 독살당했습니다."; unlockAchievement("die_poison"); over=true; }
         else if(stats.kin>=100){ t="꼭두각시"; m="외척의 손아귀에 조정이 넘어가고, 허수아비 임금이 되었습니다."; unlockAchievement("die_kin"); over=true; }
         else if(stats.military<=0){ t="함락"; m="군세가 흩어지자 북방이 무너지고, 고려가 오랑캐의 발 아래에 짓밟힙니다."; unlockAchievement("die_military"); over=true; }
@@ -916,7 +990,7 @@
         if (title === "독살") records.push("이자겸의 압박 앞에서 수상한 떡을 먹고 요절하였다.");
         if (title === "그림자 왕" || title === "미완의 개혁") records.push("오랜 기간 재위하였으나, 끝내 이자겸의 그늘을 완전히 걷어내지 못했다.");
         if (title === "무신정권") records.push("외척을 견제하기 위해 키운 군사력이 도리어 왕권을 옥죄는 족쇄가 되었다.");
-	if (title === "침묵의 왕") records.push("중대한 국면마다 입을 닫고 결정을 회피하여 조정의 혼란을 가중시켰다.");
+        if (title === "침묵의 왕") records.push("중대한 국면마다 입을 닫고 결정을 회피하여 조정의 혼란을 가중시켰다.");
 
         let evaluation = "";
         switch(title) {
@@ -963,6 +1037,8 @@
 
     function initSwipe() {
         const card=document.getElementById("game-card"), ov=document.getElementById("choice-overlay");
+        const bgOverlay = document.getElementById("background-overlay");
+
         if(card.getAttribute("d-s")==="1")return; card.setAttribute("d-s","1");
         
         let sX=0, sY=0, isD=false; let cX=0, cY=0; 
@@ -973,6 +1049,17 @@
             if(!isD)return;
             cX=x-sX; cY=y-sY;
             
+            if (Math.abs(cY) > Math.abs(cX) && cY > 0) {
+                const opacity = Math.min(cY / 200, 0.3);
+                bgOverlay.style.backgroundColor = `rgba(127, 140, 141, ${opacity})`;
+            } else if (cX < 0) {
+                const opacity = Math.min(Math.abs(cX) / 200, 0.3);
+                bgOverlay.style.backgroundColor = `rgba(231, 76, 60, ${opacity})`;
+            } else if (cX > 0) {
+                const opacity = Math.min(Math.abs(cX) / 200, 0.3);
+                bgOverlay.style.backgroundColor = `rgba(46, 204, 113, ${opacity})`;
+            }
+
             if(Math.abs(cY)>Math.abs(cX) && cY>0) { 
                 card.style.transform=`translate(0,${cY}px)`;
                 ov.style.opacity=Math.min(cY/100,1); 
@@ -1008,6 +1095,8 @@
         const end=()=>{
             if(!isD)return; isD=false; card.style.transition="transform 0.3s";
             
+            bgOverlay.style.backgroundColor = "transparent";
+
             if(cY>100 && Math.abs(cY)>Math.abs(cX)){ 
                 card.style.transform=`translate(0,1000px)`; 
                 setTimeout(()=>makeChoice(2),200); 
@@ -1044,7 +1133,3 @@
     </script>
 </body>
 </html>
-
-
-
-
