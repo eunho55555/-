@@ -373,76 +373,79 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: top 0.5s; width: 80%; text-align: center;
         }
         .toast.show { top: 20px; }
-	/* 침묵 선택 시: 재가 되어 사라지는 이펙트 */
+	/* 침묵 선택 시 검게 타서 '바닥으로' 떨어지는 이펙트 */
         .card.ash-effect {
-            animation: burnAsh 0.8s forwards ease-in-out;
-            pointer-events: none; /* 애니메이션 중 터치 방지 */
+            animation: burnAsh 0.8s forwards ease-in;
+            pointer-events: none;
         }
 
         @keyframes burnAsh {
             0% {
-                transform: translateY(100px) scale(1); 
+                transform: translateY(0) scale(1);
                 filter: brightness(1) grayscale(0);
                 opacity: 1;
             }
             40% {
-                /* 타들어가는 느낌 (더 아래로 이동) */
-                transform: translateY(150px) scale(0.95); 
+                /* 타들어가는 느낌 (살짝 아래) */
+                transform: translateY(50px) scale(0.95);
                 filter: brightness(0.3) grayscale(1) contrast(1.5);
                 opacity: 0.9;
             }
             100% {
-                /* 바닥으로 툭 떨어지며 흩어짐 */
-                transform: translateY(600px) rotate(-10deg) scale(0.6); /* 위(-200px)에서 아래(600px)로 변경 */
-                filter: blur(10px) brightness(0); /* 흐려짐 */
+                /* 바닥으로 완전히 툭 떨어짐 (양수 600px) */
+                transform: translateY(600px) rotate(-10deg) scale(0.6);
+                filter: blur(5px) brightness(0); /* 재가 되어 사라짐 */
                 opacity: 0;
             }
         }
-	/* 왼쪽(거절) 선택 시: 단칼에 베어버리는 이펙트 */
-        .card.slash-effect {
-            animation: slashLeft 0.6s forwards cubic-bezier(0.1, 0.7, 1.0, 0.1); /* 아주 빠르고 날카롭게 */
-            pointer-events: none;
-        }
-        @keyframes slashLeft {
-            0% {
-                transform: translateX(-100px) rotate(-30deg);
-            }
-            40% {
-                /* 붉게 변하며 찢겨지는 듯한 왜곡 */
-                transform: translateX(-200px) rotate(-45deg) skewX(-20deg) scale(0.9);
-                filter: contrast(1.5) sepia(1) hue-rotate(-50deg) saturate(3); /* 붉고 거친 느낌 */
-                box-shadow: -20px 0 50px rgba(231, 76, 60, 0.8); /* 붉은 잔상 */
-            }
-            100% {
-                /* 화면 밖으로 빠르게 날아감 */
-                transform: translateX(-1000px) rotate(-180deg) scale(0.5);
-                opacity: 0;
-            }
+	/* [NEW] 엔딩 이펙트 레이어 기본 설정 */
+        #ending-effect-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 8000; /* 게임 화면 위, 엔딩 메시지 아래 */
+            opacity: 0; transition: opacity 0.5s;
         }
 
-        /*  오른쪽(수락) 선택 시: 황금빛으로 승화하는 이펙트 */
-        .card.glow-effect {
-            animation: glowRight 0.8s forwards ease-out; /* 부드럽고 웅장하게 */
-            pointer-events: none;
+        /* --- 이펙트 1: 비극적/폭력적 (붉은 섬광 + 격렬한 흔들림) --- */
+        .effect-violent-flash {
+            animation: violentFlash Anim 2s forwards;
         }
-        @keyframes glowRight {
-            0% {
-                transform: translateX(100px) rotate(30deg);
-            }
-            40% {
-                /* 황금빛으로 밝게 빛남 */
-                transform: translateX(200px) rotate(45deg) scale(1.1);
-                /* 채도를 높이고 노란색 계열로 변경하여 황금 느낌 */
-                filter: brightness(1.3) sepia(1) saturate(5) hue-rotate(5deg); 
-                box-shadow: 0 0 60px rgba(241, 196, 15, 1); /* 강렬한 황금 광채 */
-            }
-            100% {
-                /* 오른쪽 위로 부드럽게 사라짐 */
-                transform: translate(800px, -200px) rotate(90deg) scale(0.8);
-                opacity: 0;
-                filter: blur(20px) brightness(2); /* 빛 속으로 사라지는 느낌 */
-            }
+        @keyframes violentFlashAnim {
+             0% { opacity: 0; background-color: rgba(255, 0, 0, 0); }
+             10% { opacity: 0.8; background-color: rgba(231, 76, 60, 0.6); }
+             100% { opacity: 1; background-color: rgba(100, 0, 0, 0.9); }
         }
+        /* 기존 shake보다 더 강한 흔들림 */
+        .violent-shake {
+            animation: shakeHard 0.2s infinite;
+        }
+        @keyframes shakeHard {
+            0% { transform: translate(0px, 0px) rotate(0deg); }
+            25% { transform: translate(-5px, -5px) rotate(-1deg); }
+            50% { transform: translate(5px, 5px) rotate(1deg); }
+            75% { transform: translate(-5px, 5px) rotate(-1deg); }
+            100% { transform: translate(5px, -5px) rotate(1deg); }
+        }
+
+        /* --- 이펙트 2: 암울한 실패 (흑백 + 어두워짐) --- */
+        .effect-gloomy-fade {
+            animation: gloomyFadeAnim 3s forwards;
+        }
+        @keyframes gloomyFadeAnim {
+            0% { opacity: 0; background-color: rgba(0,0,0,0); backdrop-filter: grayscale(0%); }
+            100% { opacity: 1; background-color: rgba(0,0,0,0.8); backdrop-filter: grayscale(100%); }
+        }
+
+        /* --- 이펙트 3: 영광스러운 성공 (황금빛 광채) --- */
+        .effect-glorious-shine {
+            animation: gloriousShineAnim 3s forwards ease-out;
+        }
+        @keyframes gloriousShineAnim {
+            0% { opacity: 0; background: radial-gradient(circle, rgba(241, 196, 15, 0.2) 0%, transparent 50%); }
+            50% { opacity: 1; background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, transparent 70%); scale: 1.2; }
+            100% { opacity: 1; background: rgba(255, 215, 0, 0.3); scale: 1; }
+        }
+
+
     </style>
 </head>
 <body>
@@ -462,7 +465,7 @@
     </div>
     
     <div id="warning-overlay" class="warning-overlay"></div>
-    
+    <div id="ending-effect-overlay"></div>
     <div id="background-overlay"></div>
     <div id="game-container" class="game-container">
         <div class="top-bar">
@@ -767,6 +770,12 @@
         cheokRandomTurn = Math.floor(Math.random() * 31) + 10; 
 
         randomDeck.forEach(c => c.hasPlayed = false);
+
+	const effectOverlay = document.getElementById("ending-effect-overlay");
+        const gameContainer = document.getElementById("game-container");
+        effectOverlay.className = ""; // 모든 클래스 제거
+        gameContainer.classList.remove("violent-shake");
+        gameContainer.style.filter = "none"; // 혹시 적용된 필터 해제
 
         document.body.classList.remove("phase-fire");
         document.getElementById("game-over-screen").style.display="none";
@@ -1097,13 +1106,45 @@
         }
 
         if(over) {
-            // [NEW] 1단계: 메시지 오버레이 표시
-            document.getElementById("end-title-msg").innerText = t;
-            document.getElementById("end-reason-msg").innerText = m;
-            document.getElementById("game-container").style.opacity = 0; 
-            document.getElementById("ending-msg-screen").style.display = "flex";
+            //  엔딩 종류에 따른 특수 효과 결정
+            const effectOverlay = document.getElementById("ending-effect-overlay");
+            const gameContainer = document.getElementById("game-container");
+            let delayTime = 1000; // 기본 2초 대기
+
+            // 1. 폭력적/비극적 엔딩 그룹
+            const violentEndings = ["독살", "낙마", "함락", "정변", "민란", "폭군"];
+            // 2. 암울한/정치적 실패 엔딩 그룹
+            const gloomyEndings = ["폐위", "꼭두각시", "파산", "그림자 왕", "군부의 꼭두각시", "미완의 개혁", "침묵의 왕"];
+            // 3. 성공 엔딩 그룹
+            const gloriousEndings = ["명군", "군주"];
+
+            if (violentEndings.includes(t)) {
+                effectOverlay.classList.add("effect-violent-flash");
+                gameContainer.classList.add("violent-shake");
+                delayTime = 1000; // 조금 더 길게
+            } 
+            else if (gloomyEndings.includes(t)) {
+                effectOverlay.classList.add("effect-gloomy-fade");
+                // 게임 컨테이너도 흑백 처리
+                gameContainer.style.transition = "filter 3s";
+                gameContainer.style.filter = "grayscale(100%) brightness(0.5)";
+                delayTime = 3000; // 천천히 어두워짐
+            }
+            else if (gloriousEndings.includes(t)) {
+                effectOverlay.classList.add("effect-glorious-shine");
+                delayTime = 3000; // 영광을 만끽하는 시간
+            }
+
+            //  이펙트를 보여준 후 일정 시간 뒤에 결과 화면 표시
+            setTimeout(() => {
+                document.getElementById("end-title-msg").innerText = t;
+                document.getElementById("end-reason-msg").innerText = m;
+                // 게임 컨테이너 숨김 (이펙트 레이어는 유지)
+                gameContainer.style.opacity = 0; 
+                document.getElementById("ending-msg-screen").style.display = "flex";
+            }, delayTime);
             
-            // 데이터는 미리 만들어두지만 화면은 아직 안 보여줌
+            // 데이터 생성 (미리 해둠)
             generateHistory(t, m);
             return true;
         }
@@ -1253,58 +1294,60 @@
 
         const end=()=>{
             if(!isD)return; isD=false; 
-            // card.style.transition="transform 0.3s"; // <-- 이 줄은 삭제하거나 주석 처리 (애니메이션 충돌 방지)
+            card.style.transition="transform 0.3s"; 
             bgOverlay.style.backgroundColor = "transparent";
 
-            // 1. 침묵 (아래쪽) - 재가 되어 떨어짐
+            // 1. 침묵 (아래쪽) - ★특수 효과 적용 (0.75초 대기)★
             if(cY>100 && Math.abs(cY)>Math.abs(cX)){ 
-                applyEffect(2, "ash-effect", 750); // 2번 선택지, 효과 클래스명, 시간(ms)
+                applyEffect(2, "ash-effect", 750); 
             }
-            // 2. 수락 (오른쪽) - 황금빛 승화
+            
+            // 2. 수락 (오른쪽) - 빠르고 깔끔하게 (0.2초)
             else if(cX>100){ 
-                applyEffect(1, "glow-effect", 750); // 1번 선택지, 효과 클래스명, 시간(ms)
+                card.style.transform=`translate(1000px,0) rotate(30deg)`; 
+                setTimeout(()=>makeChoice(1), 200); 
             }
-            // 3. 거절 (왼쪽) - 단칼에 베어버림
+            
+            // 3. 거절 (왼쪽) - 빠르고 깔끔하게 (0.2초)
             else if(cX<-100){ 
                 if (isPhase2 && stats.royal < 30) {
-                    resetCard();
-                    showToast("스탯이 부족해 선택할 수 없습니다! (왕권 30 필요)");
+                    // 왕권 부족 시 튕겨냄
+                    card.style.transform="translate(0,0) rotate(0)"; 
+                    ov.style.opacity=0; 
+                    hidePreview();
+                    showToast("⛔ 스탯이 부족해 선택할 수 없습니다! (왕권 30 필요)");
                 } else {
-                    applyEffect(0, "slash-effect", 550); // 0번 선택지, 효과 클래스명, 시간(ms) - 조금 더 빠르게
+                    card.style.transform=`translate(-1000px,0) rotate(-30deg)`; 
+                    setTimeout(()=>makeChoice(0), 200); 
                 }
             }
-            // 4. 취소 (제자리 복귀)
+            
+            // 4. 취소 (제자리)
             else { 
-                resetCard();
+                card.style.transform="translate(0,0) rotate(0)"; 
+                ov.style.opacity=0; 
+                hidePreview(); 
             }
             cX=0; cY=0;
         };
 
-        // [NEW] 이펙트 적용 및 카드 리셋을 처리하는 헬퍼 함수
+        // (applyEffect 함수는 아래쪽 침묵을 위해 필요)
         const applyEffect = (choiceIdx, effectClass, duration) => {
             card.style.transition = "none"; // CSS 애니메이션을 위해 트랜지션 끔
             card.classList.add(effectClass);
             
             setTimeout(()=>{
-                makeChoice(choiceIdx); // 로직 수행
+                makeChoice(choiceIdx); 
                 
-                // 카드 상태 초기화
+                // 초기화
                 card.classList.remove(effectClass);
                 card.style.transform = "translate(0,0) rotate(0)";
                 ov.style.opacity=0; 
                 hidePreview();
                 
-                // 다음 카드를 위한 부드러운 움직임 복구
+                // 트랜지션 복구
                 setTimeout(() => card.style.transition = "transform 0.3s", 50);
             }, duration);
-        }
-
-        // [NEW] 카드 제자리 복귀 헬퍼 함수
-        const resetCard = () => {
-            card.style.transition = "transform 0.3s";
-            card.style.transform="translate(0,0) rotate(0)"; 
-            ov.style.opacity=0; 
-            hidePreview(); 
         }
 
         card.addEventListener("touchstart",e=>start(e.touches[0].clientX,e.touches[0].clientY),{passive:false});
