@@ -373,6 +373,76 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: top 0.5s; width: 80%; text-align: center;
         }
         .toast.show { top: 20px; }
+	/* 침묵 선택 시: 재가 되어 사라지는 이펙트 */
+        .card.ash-effect {
+            animation: burnAsh 0.8s forwards ease-in-out;
+            pointer-events: none; /* 애니메이션 중 터치 방지 */
+        }
+
+        @keyframes burnAsh {
+            0% {
+                transform: translateY(100px) scale(1); 
+                filter: brightness(1) grayscale(0);
+                opacity: 1;
+            }
+            40% {
+                /* 타들어가는 느낌 (더 아래로 이동) */
+                transform: translateY(150px) scale(0.95); 
+                filter: brightness(0.3) grayscale(1) contrast(1.5);
+                opacity: 0.9;
+            }
+            100% {
+                /* 바닥으로 툭 떨어지며 흩어짐 */
+                transform: translateY(600px) rotate(-10deg) scale(0.6); /* 위(-200px)에서 아래(600px)로 변경 */
+                filter: blur(10px) brightness(0); /* 흐려짐 */
+                opacity: 0;
+            }
+        }
+	/* 왼쪽(거절) 선택 시: 단칼에 베어버리는 이펙트 */
+        .card.slash-effect {
+            animation: slashLeft 0.6s forwards cubic-bezier(0.1, 0.7, 1.0, 0.1); /* 아주 빠르고 날카롭게 */
+            pointer-events: none;
+        }
+        @keyframes slashLeft {
+            0% {
+                transform: translateX(-100px) rotate(-30deg);
+            }
+            40% {
+                /* 붉게 변하며 찢겨지는 듯한 왜곡 */
+                transform: translateX(-200px) rotate(-45deg) skewX(-20deg) scale(0.9);
+                filter: contrast(1.5) sepia(1) hue-rotate(-50deg) saturate(3); /* 붉고 거친 느낌 */
+                box-shadow: -20px 0 50px rgba(231, 76, 60, 0.8); /* 붉은 잔상 */
+            }
+            100% {
+                /* 화면 밖으로 빠르게 날아감 */
+                transform: translateX(-1000px) rotate(-180deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /*  오른쪽(수락) 선택 시: 황금빛으로 승화하는 이펙트 */
+        .card.glow-effect {
+            animation: glowRight 0.8s forwards ease-out; /* 부드럽고 웅장하게 */
+            pointer-events: none;
+        }
+        @keyframes glowRight {
+            0% {
+                transform: translateX(100px) rotate(30deg);
+            }
+            40% {
+                /* 황금빛으로 밝게 빛남 */
+                transform: translateX(200px) rotate(45deg) scale(1.1);
+                /* 채도를 높이고 노란색 계열로 변경하여 황금 느낌 */
+                filter: brightness(1.3) sepia(1) saturate(5) hue-rotate(5deg); 
+                box-shadow: 0 0 60px rgba(241, 196, 15, 1); /* 강렬한 황금 광채 */
+            }
+            100% {
+                /* 오른쪽 위로 부드럽게 사라짐 */
+                transform: translate(800px, -200px) rotate(90deg) scale(0.8);
+                opacity: 0;
+                filter: blur(20px) brightness(2); /* 빛 속으로 사라지는 느낌 */
+            }
+        }
     </style>
 </head>
 <body>
@@ -1136,6 +1206,7 @@
             if(!isD)return;
             cX=x-sX; cY=y-sY;
             
+            // 배경색 변경 로직 (기존 유지)
             if (Math.abs(cY) > Math.abs(cX) && cY > 0) {
                 const opacity = Math.min(cY / 200, 0.3);
                 bgOverlay.style.backgroundColor = `rgba(127, 140, 141, ${opacity})`;
@@ -1147,6 +1218,7 @@
                 bgOverlay.style.backgroundColor = `rgba(46, 204, 113, ${opacity})`;
             }
 
+            // 카드 이동 (기존 유지)
             if(Math.abs(cY)>Math.abs(cX) && cY>0) { 
                 card.style.transform=`translate(0,${cY}px)`;
                 ov.style.opacity=Math.min(cY/100,1); 
@@ -1180,36 +1252,60 @@
         };
 
         const end=()=>{
-            if(!isD)return; isD=false; card.style.transition="transform 0.3s";
-            
+            if(!isD)return; isD=false; 
+            // card.style.transition="transform 0.3s"; // <-- 이 줄은 삭제하거나 주석 처리 (애니메이션 충돌 방지)
             bgOverlay.style.backgroundColor = "transparent";
 
+            // 1. 침묵 (아래쪽) - 재가 되어 떨어짐
             if(cY>100 && Math.abs(cY)>Math.abs(cX)){ 
-                card.style.transform=`translate(0,1000px)`; 
-                setTimeout(()=>makeChoice(2),200); 
+                applyEffect(2, "ash-effect", 750); // 2번 선택지, 효과 클래스명, 시간(ms)
             }
+            // 2. 수락 (오른쪽) - 황금빛 승화
             else if(cX>100){ 
-                card.style.transform=`translate(1000px,0) rotate(30deg)`; 
-                setTimeout(()=>makeChoice(1),200); 
+                applyEffect(1, "glow-effect", 750); // 1번 선택지, 효과 클래스명, 시간(ms)
             }
+            // 3. 거절 (왼쪽) - 단칼에 베어버림
             else if(cX<-100){ 
                 if (isPhase2 && stats.royal < 30) {
-                    card.style.transform="translate(0,0) rotate(0)"; 
-                    ov.style.opacity=0; 
-                    hidePreview();
-                    showToast("⛔ 스탯이 부족해 선택할 수 없습니다! (왕권 30 필요)");
+                    resetCard();
+                    showToast("스탯이 부족해 선택할 수 없습니다! (왕권 30 필요)");
                 } else {
-                    card.style.transform=`translate(-1000px,0) rotate(-30deg)`; 
-                    setTimeout(()=>makeChoice(0),200); 
+                    applyEffect(0, "slash-effect", 550); // 0번 선택지, 효과 클래스명, 시간(ms) - 조금 더 빠르게
                 }
             }
+            // 4. 취소 (제자리 복귀)
             else { 
-                card.style.transform="translate(0,0) rotate(0)"; 
-                ov.style.opacity=0; 
-                hidePreview(); 
+                resetCard();
             }
             cX=0; cY=0;
         };
+
+        // [NEW] 이펙트 적용 및 카드 리셋을 처리하는 헬퍼 함수
+        const applyEffect = (choiceIdx, effectClass, duration) => {
+            card.style.transition = "none"; // CSS 애니메이션을 위해 트랜지션 끔
+            card.classList.add(effectClass);
+            
+            setTimeout(()=>{
+                makeChoice(choiceIdx); // 로직 수행
+                
+                // 카드 상태 초기화
+                card.classList.remove(effectClass);
+                card.style.transform = "translate(0,0) rotate(0)";
+                ov.style.opacity=0; 
+                hidePreview();
+                
+                // 다음 카드를 위한 부드러운 움직임 복구
+                setTimeout(() => card.style.transition = "transform 0.3s", 50);
+            }, duration);
+        }
+
+        // [NEW] 카드 제자리 복귀 헬퍼 함수
+        const resetCard = () => {
+            card.style.transition = "transform 0.3s";
+            card.style.transform="translate(0,0) rotate(0)"; 
+            ov.style.opacity=0; 
+            hidePreview(); 
+        }
 
         card.addEventListener("touchstart",e=>start(e.touches[0].clientX,e.touches[0].clientY),{passive:false});
         card.addEventListener("mousedown",e=>start(e.clientX,e.clientY));
