@@ -429,7 +429,7 @@
     let silenceStreak = 0;
 
     // [데이터 1] 연계 이벤트
-    const event_fire_loot = { text: "“불이 서적과 보물이 가득한 전각으로 번지고 있습니다!”", leftBtn: "왕실 서적을 옮겨라", rightBtn: "보물을 챙겨라", leftEffect: [0, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 20, -10], requirePhase2: true };
+    const event_fire_loot = { text: "“불이 서적과 보물이 가득한 전각으로 번지고 있습니다!”", leftBtn: "왕실 서적을 옮겨라", rightBtn: "보물을 챙겨라", leftEffect: [10, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 30, -10], requirePhase2: true };
     const event_arson = { text: "“척준경이 결국 궁에 불을 질렀습니다! 연경궁이 타고 있습니다!”", leftBtn: "화마를 진압하라", rightBtn: "도망치자", leftEffect: [0, 0, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0], leftNext: event_fire_loot, rightNext: event_fire_loot, requirePhase2: true };
     const event_seungpyeong_gate = { text: "“반란군이 승평문(昇平門) 앞까지 들이닥쳤습니다! 척준경이 문을 부수려 합니다!”", leftBtn: "활을 쏘아 맞서라!", rightBtn: "일단 대화로 시간을 끌어라",  leftEffect: [0, 0, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0], leftNext: event_arson, rightNext: event_arson, requirePhase2: true };
     const event_cheok_rage = {text: "“척준경의 동생과 아들이 우리 군사에게 죽었습니다! 척준경이 분노하여 달려옵니다!”", leftBtn: "성문을 잠궈라!", rightBtn: "오해였다고 전해라", leftEffect: [0, 0, 0, 0, 0], rightEffect: [0, 0, 0, 0, 0], leftNext: event_seungpyeong_gate, rightNext: event_seungpyeong_gate,  requirePhase2: true };
@@ -471,17 +471,17 @@
     const randomDeck = [
         // [1페이즈]
         { onlyPhase1: true, text: "“전하, 이자겸 대감께서 셋째 딸을 전하의 비로 맞이하라고 하십니다.”", leftBtn: "이모와 결혼이라니!", rightBtn: "받아들여라", leftEffect: [10, -20, 0, 0, 0], rightEffect: [-10, 20, 0, 0, -10] },
-        { onlyPhase1: true, text: "“대감의 사촌의 팔촌을 장군으로 임명하라는 상소가 올라왔습니다.”", leftBtn: "시키는 대로 해", rightBtn: "능력이 우선이다", leftEffect: [-10, 10, -10, 0, 0], rightEffect: [10, -10, 10, 0, 0] },
+        { onlyPhase1: true, text: "“대감의 사촌의 팔촌을 장군으로 임명하라는 상소가 올라왔습니다.”", leftBtn: "시키는 대로 해", rightBtn: "능력이 우선이다", leftEffect: [-10, 10, -10, 10, 0], rightEffect: [10, -10, 10, 0, 0] },
         { onlyPhase1: true, text: "“이자겸 대감의 생신입니다. 선물을 보내시겠습니까?”", leftBtn: "화려하게 보내라!", rightBtn: "마음만 전해라", leftEffect: [0, 10, 0, -10, 0], rightEffect: [0, -10, 0, 0, 0] },
         { onlyPhase1: true, text: "“시중에 '십자(十八子: 이씨)가 왕이 된다'는 소문이 돌고 있습니다.”", leftBtn: "헛소문이다!", rightBtn: "흥미롭군...", leftEffect: [10, -10, 0, 0, 0], rightEffect: [0, 10, 0, 0, 0] },
         { onlyPhase1: true, text: "“왕실의 재정과 이자겸 가문의 재정이 섞여 국고 파악이 어렵습니다.”", leftBtn: "분리 개혁을 추진하라", rightBtn: "장인이 알아서 하겠지", leftEffect: [10, -10, 0, 10, 0], rightEffect: [-10, 10, 0, -10, 0] },
         { onlyPhase1: true, text: "“신하들이 중앙군의 규모를 두 배로 늘리자고 제안합니다.”", leftBtn: "비밀리에 진행한다", rightBtn: "돈이 문제다", leftEffect: [10, 0, 20, -20, 0], rightEffect: [-10, 0, 0, 0, 0] },
-        { onlyPhase1: true, text: "“올해는 풍년입니다. 백성들이 수확한 곡식 덕분에 국고가 채워졌습니다.”", leftBtn: "이미 국고가 채워졌으니 세금을 낮춰라", rightBtn: "세금을 더 올려도 된다는 뜻이군?", leftEffect: [0, 0, 0, 0, 30], rightEffect: [0, 0, 0, 20, -20] },
+        { onlyPhase1: true, text: "“올해는 풍년입니다. 백성들이 수확한 곡식 덕분에 국고가 채워졌습니다.”", leftBtn: "이미 국고가 채워졌으니 세금을 낮춰라", rightBtn: "세금을 더 올려도 된다는 뜻이군?", leftEffect: [0, 0, 0, 0, 30], rightEffect: [0, 0, 0, 30, -20] },
         { onlyPhase1: true, text: "“송나라의 사신이 금나라를 견제하자며 선물을 가지고 왔습니다.”", leftBtn: "국고에 채워 넣어", rightBtn: "금을 화나게 해선 안된다…", leftEffect: [0, 0, 0, 10, 0], rightEffect: [-10, 0, 0, 0, 0] },
         { onlyPhase1: true, text: "“북방의 장군 한 명이 은퇴 후 궁궐 호위직을 자처했습니다.”", leftBtn: "즉시 임명한다", rightBtn: "노고를 치하하고 돌려보낸다", leftEffect: [10, 0, 10, -10, 0], rightEffect: [0, 0, -10, 0, 0] },
         { onlyPhase1: true, text: "“궁궐 밖 백성들 사이에서 전염병이 창궐하고 있습니다.”", leftBtn: "격리시키고 방치하라", rightBtn: "약재를 공급하라", leftEffect: [0, 0, 0, 0, -20], rightEffect: [10, 0, 0, -10, 20] },
         { onlyPhase1: true, text: "“밤사이 궁궐에 벼락이 떨어져 흉흉한 소문이 돌고 있습니다.”", leftBtn: "궁궐을 수리하라", rightBtn: "운명이다", leftEffect: [10, 0, 0, -10, 10], rightEffect: [-10, 0, 0, 0, -10] },
-        { onlyPhase1: true, text: "“오래된 건물 지붕이 무너졌습니다. 안전을 위해서는 수리해야 합니다.”", leftBtn: "국고를 털어 수리하라", rightBtn: "자재를 징발하라", leftEffect: [0, 0, 0, -10, 0], rightEffect: [0, 0, 0, 0, -10] },
+        { onlyPhase1: true, text: "“오래된 건물 지붕이 무너졌습니다. 안전을 위해서는 수리해야 합니다.”", leftBtn: "국고를 털어 수리하라", rightBtn: "자재를 징발하라", leftEffect: [0, 0, 0, -10, 0], rightEffect: [0, 0, 0, 10, -10] },
         { onlyPhase1: true, text: "“남쪽 해안가에 해적이 자주 출몰하고 있다는 보고가 올라왔습니다.”", leftBtn: "군사를 보내 토벌하라", rightBtn: "지방에 맡긴다", leftEffect: [0, 0, 10, -20, 20], rightEffect: [0, 0, 0, 0, -20] },
         { onlyPhase1: true, text: "“환관 한 명이 이자겸과 척준경이 주고 받은 비밀 서찰을 입수해왔습니다. 열어보시겠습니까?”", leftBtn: "즉시 열어 본다", rightBtn: " 그대로 태워버려라", leftEffect: [0, -10, -10, 0, 0], rightEffect: [0, 0, 0, 0, 0] },
         { onlyPhase1: true, text: "“이자겸 파벌과 외척들이 왕에게 절할 때 허리만 굽히는 경우가 늘고 있습니다.”", leftBtn: "예법을 바로잡아라", rightBtn: "사소한 일이다", leftEffect: [20, -20, 0, 0, 0], rightEffect: [-20, 20, 0, 0, 0] },
@@ -490,10 +490,10 @@
         { onlyPhase1: true, text: "“승려들이 대규모 불교 행사를 열기 위한 지원을 요청합니다.”", leftBtn: "지원한다", rightBtn: "알아서 해라", leftEffect: [0, 0, 0, -10, 10], rightEffect: [0, 0, 0, 0, -10] },
         { onlyPhase1: true, text: "“탐라군(제주)에서 특산물을 가지고 왔습니다.”", leftBtn: "후한 보상을 내린다", rightBtn: "더 가져와!", leftEffect: [0, 0, 0, -10, 10], rightEffect: [0, 0, 0, 10, -10] },
         { onlyPhase1: true, text: "“왕실의 정통성을 위해 역사서를 새로 편찬하자는 건의가 올라왔습니다.”", leftBtn: "학자들에게 명령한다", rightBtn: "시급한 일이 아니다", leftEffect: [10, 0, 0, -10, 0], rightEffect: [-10, 0, 0, 0, 0] },
-        { onlyPhase1: true, text: "“관리 부실로 지방 세금 징수가 원활하게 이루어지지 않고 있습니다.”", leftBtn: "군사를 파견하라", rightBtn: "사정을 봐주자", leftEffect: [0, 0, 0, 10, -20], rightEffect: [0, 0, 0, -10, 20] },
+        { onlyPhase1: true, text: "“관리 부실로 지방 세금 징수가 원활하게 이루어지지 않고 있습니다.”", leftBtn: "군사를 파견하라", rightBtn: "사정을 봐주자", leftEffect: [0, 0, 0, 20, -20], rightEffect: [0, 0, 0, -10, 20] },
         { onlyPhase1: true, text: "“이자겸의 종들이 백성들의 땅을 뺏어 수레에 싣고 있습니다.”", leftBtn: "어쩔 수 없다...", rightBtn: "수레를 엎어라!", leftEffect: [-20, 10, 0, 0, -20], rightEffect: [20, -10, 0, 0, 20] },
-        { onlyPhase1: true, text: "“이자겸이 집에 '숭덕부'라는 관청을 세우고 독자적으로 정치를 하려 합니다.”", leftBtn: "수고를 덜어주니...", rightBtn: "왕이 둘이냐?", leftEffect: [-20, 20, 0, 0, 0], rightEffect: [10, -10, 0, 0, 0] },
-        { onlyPhase1: true, text: "“이자겸이 몰래 사병을 기르고 무기를 사들이고 있다는 첩보입니다.”", leftBtn: "분명 나라를 위한 행동일 것이다", rightBtn: "측근에게 사병을 키우라고 명한다", leftEffect: [-10, 20, 0, 0, 0], rightEffect: [10, 0, 10, -20, 0] },
+        { onlyPhase1: true, text: "“이자겸이 집에 '숭덕부'라는 관청을 세우고 독자적으로 정치를 하려 합니다.”", leftBtn: "수고를 덜어주니...", rightBtn: "왕이 둘이냐?", leftEffect: [-20, 20, 0, 10, 0], rightEffect: [10, -10, 0, 0, 0] },
+        { onlyPhase1: true, text: "“이자겸이 몰래 사병을 기르고 무기를 사들이고 있다는 첩보입니다.”", leftBtn: "분명 나라를 위한 행동일 것이다", rightBtn: "측근에게 사병을 키우라고 명한다", leftEffect: [-10, 20, 0, 10, 0], rightEffect: [10, 0, 10, -20, 0] },
         { onlyPhase1: true, 
           isHunting: true, 
           text: "“매형(이자겸의 아들)이 사냥을 가자고 합니다. 화살이 어디로 날아올지 모릅니다.”", leftBtn: "겁먹을 순 없다", rightBtn: "아프다고 한다", leftEffect: [10, 0, 0, 0, 0], rightEffect: [-10, 0, 0, 0, 0] },
@@ -501,8 +501,8 @@
         { onlyPhase1: true, text: "“서역 상인이 질 좋은 철검을 가지고 왔습니다.”", leftBtn: "모두 사들여라", rightBtn: "돈이 없다", leftEffect: [0, 0, 10, -20, 0], rightEffect: [0, 0, -10, 0, 0] },
         { onlyPhase1: true, text: "“신봉문(神鳳門)에 행차하여 죄인들을 사면하시겠습니까?”", leftBtn: "덕을 베풀라", rightBtn: "법은 엄격해야 한다", leftEffect: [10, 0, 0, 0, 10], rightEffect: [10, 0, 0, 0, 0] },
         { onlyPhase1: true, text: "“김부식 등이 선왕의 기록인 '예종실록' 편찬을 시작하겠다고 합니다.”", leftBtn: "지원을 아끼지 마라", rightBtn: "국고를 아껴라", leftEffect: [20, 0, 0, -20, 0], rightEffect: [-20, 0, 0, 10, 0] },
-        { onlyPhase1: true, text: "“팔관회를 열어 부처님의 힘으로 나라의 안녕을 빌 시기가 되었습니다.”", leftBtn: "성대하게 열어라", rightBtn: "간소하게 하라", leftEffect: [20, 0, 0, -30, 30], rightEffect: [-10, 0, 0, 0, -20] },
-        { onlyPhase1: true, text: "“동여진 추장이 화친의 의미로 좋은 말을 바쳤습니다.”", leftBtn: "하사품을 내려라", rightBtn: "경계해야 한다. 군사를 늘린다.", leftEffect: [10, 0, 0, 0, 0], rightEffect: [0, 0, 10, -20, 0] },
+        { onlyPhase1: true, text: "“팔관회를 열어 부처님의 힘으로 나라의 안녕을 빌 시기가 되었습니다.”", leftBtn: "성대하게 열어라", rightBtn: "간소하게 하라", leftEffect: [20, 0, 0, -30, 30], rightEffect: [-10, 0, 0, 10, -20] },
+        { onlyPhase1: true, text: "“동여진 추장이 화친의 의미로 좋은 말을 바쳤습니다.”", leftBtn: "하사품을 내려라", rightBtn: "경계해야 한다. 군사를 늘린다.", leftEffect: [10, 0, 0, 10, 0], rightEffect: [0, 0, 10, -10, 0] },
         { onlyPhase1: true, text: "“송나라 사신이 전하께 정식으로 책봉을 요청하라고 귀띔했습니다.”", leftBtn: "사신을 보내라", rightBtn: "우리는 독자적인 국가다", leftEffect: [10, 0, 0, -10, 0], rightEffect: [10, 0, -10, 0, 0] },
         { onlyPhase1: true, text: "“이자겸 대감이 공을 인정받아 '조선국공(朝鮮國公)'의 지위에 오르길 원합니다.”", leftBtn: "허락한다...", rightBtn: "그건 왕의 지위다!", leftEffect: [-20, 20, 0, 0, 0], rightEffect: [10, -10, 0, 0, 0] },
         { onlyPhase1: true, text: "“이자겸 대감이 자신의 집으로 전하를 초대해 밤늦게까지 잔치를 열자고 합니다.”", leftBtn: "장인의 청이니 가자", rightBtn: "체통을 지켜야 한다", leftEffect: [0, 20, 0, 0, 0], rightEffect: [10, -10, 0, 0, 0] },
@@ -511,7 +511,7 @@
         { onlyPhase1: true, text: "“요나라(거란)로 보낸 사신이 길이 막혀 도착하지 못하고 돌아왔습니다. 국제 정세가 심상치 않습니다.”", leftBtn: "금나라와 친해지자", rightBtn: "송나라와 더욱 교류하자", leftEffect: [0, 0, 10, -10, 0], rightEffect: [0, 0, -10, 20, 0] },
         { onlyPhase1: true, text: "“가뭄이 계속되고 있습니다. 무당을 모아 비를 빌어야 한다는 건의가 있습니다.”", leftBtn: "기우제를 지내라", rightBtn: "미신일 뿐이다", leftEffect: [10, 0, 0, -20, 20], rightEffect: [0, 0, 0, 0, -20] },
         { onlyPhase1: true, text: "“억울함을 호소하는 죄수들이 많습니다. 재심을 하시겠습니까?”", leftBtn: "다시 살펴라", rightBtn: "판결은 유지된다", leftEffect: [10, 0, 0, 0, 10], rightEffect: [0, 0, 0, 0, 0] },
-        { onlyPhase1: true, text: "“지방의 주(州)와 진(鎭)을 지키는 장교들의 녹봉(월급) 기준을 정해야 합니다.”", leftBtn: "후하게 줘라", rightBtn: "녹봉을 줄여라", leftEffect: [0, 0, 10, -10, 0], rightEffect: [0, 0, -10, 10, 0] },
+        { onlyPhase1: true, text: "“지방의 주(州)와 진(鎭)을 지키는 장교들의 녹봉(월급) 기준을 정해야 합니다.”", leftBtn: "후하게 줘라", rightBtn: "녹봉을 줄여라", leftEffect: [0, 0, 10, -10, 0], rightEffect: [0, 0, -10, 20, 0] },
         { onlyPhase1: true, text: "“탐관오리들이 국법을 교묘하게 악용해 백성들을 수탈하고 있습니다.”", leftBtn: "엄벌에 처하라!", rightBtn: "관료들을 믿어보자", leftEffect: [10, -10, 0, 0, 20], rightEffect: [-10, 10, 0, 0, -20] },
         { onlyPhase1: true, text: "“과거 시험 합격자 명단이 올라왔습니다. 누구를 등용하시겠습니까?”", leftBtn: "능력 위주로 뽑아라", rightBtn: "추천받은 자를 뽑아라", leftEffect: [0, -10, 0, 0, 0], rightEffect: [0, 10, 0, 0, 0] },
         { onlyPhase1: true, text: "“대낮에 해가 빛을 잃었습니다(일식)! 왕의 부덕함을 경고하는 하늘의 뜻입니다.”", leftBtn: "자숙하고 반성한다", rightBtn: "자연 현상일 뿐이다", leftEffect: [-10, 0, 0, 0, 0], rightEffect: [0, 0, 0, 0, -10] },
@@ -522,10 +522,10 @@
         { onlyPhase1: true, text: "“척준경이 이자겸에게 서운함을 느끼고 있습니다. 누구에게 선물을 보낼까요?”", leftBtn: "장인에게 밉보일 이유는 없다", rightBtn: "용맹한 장군을 위로한다", leftEffect: [0, 10, -10, -10, 0], rightEffect: [0, -10, 10, -10, 0] },
         { onlyPhase1: true, text: "“가뭄이 심각해져서 강의 바닥이 보일 정도입니다.”", leftBtn: "기우제를 올리자", rightBtn: "개입하지 않는다", leftEffect: [10, 0, 0, -20, 20], rightEffect: [0, 0, 0, 0, -10] },
         { onlyPhase1: true, text: "“궁궐 정원에서 쌍둥이 봉황새가 나타났다는 소문이 돌고 있습니다.”", leftBtn: "길조를 널리 퍼트려라", rightBtn: "이는 왕실만의 복이다", leftEffect: [10, 0, 0, 0, 10], rightEffect: [20, 0, 0, 0, 0] },
-        { onlyPhase1: true, text: "“군대의 비축 군량미가 썩어서 못 쓰게 되었습니다.”", leftBtn: "새 군량미를 마련하라", rightBtn: "그대로 지급하라", leftEffect: [0, 0, 10, -30, 0], rightEffect: [-10, 0, -20, 0, -10] },
+        { onlyPhase1: true, text: "“군대의 비축 군량미가 썩어서 못 쓰게 되었습니다.”", leftBtn: "새 군량미를 마련하라", rightBtn: "그대로 지급하라", leftEffect: [0, 0, 10, -30, 10], rightEffect: [-10, 0, -20, 10, -10] },
         { onlyPhase1: true, text: "“금나라 사신이 고려에 머무는 동안 횡포를 부리고 있습니다.”", leftBtn: "감내해라", rightBtn: "서신으로 불쾌감을 표현해라", leftEffect: [-10, 0, 0, -10, -10], rightEffect: [10, 0, -20, 0, 10] },
         { onlyPhase1: true, text: "“척준경이 궁궐에서 나무를 들어올려 휘두르는 기예를 선보였습니다.”", leftBtn: "그대는 고려의 보배다!", rightBtn: "재미있는 묘기로군!", leftEffect: [0, 0, 10, 0, 0], rightEffect: [0, 0, 0, 0, 0] },
-        { onlyPhase1: true, text: "“척준경의 먼 친척이 재판에 휘말려, 은밀히 편의를 봐달라 청탁합니다.”", leftBtn: "체면을 세워준다", rightBtn: "재판은 공정해야한다", leftEffect: [0, 0, 10, 0, -10], rightEffect: [10, 0, -10, 0, 10] },
+        { onlyPhase1: true, text: "“척준경의 먼 친척이 재판에 휘말려, 은밀히 편의를 봐달라 청탁합니다.”", leftBtn: "체면을 세워준다", rightBtn: "재판은 공정해야한다", leftEffect: [0, 0, 10, 10, -10], rightEffect: [10, 0, -10, 0, 10] },
 
         // [2페이즈]
         { requirePhase2: true, text: "거사를 주도한 최탁, 안보린 등이 체포되었습니다. 이자겸이 처벌을 요구합니다.", leftBtn: "모두 내가 시킨 일이다", rightBtn: "나는 모르는 일이다", leftEffect: [20, -20, 0, 0, 0], rightEffect: [-20, 20, 0, 0, 0] },
@@ -1011,5 +1011,6 @@
     </script>
 </body>
 </html>
+
 
 
